@@ -698,6 +698,12 @@ sub new {
   my $nsDefaultDecl = undef;
   my @nsCopyFlag = ();
   my $nsCopyFlag = 0;
+  my @forcedNSDecls = ();
+
+  if ($params{FORCED_NS_DECLS}) {
+    @forcedNSDecls = @{$params{FORCED_NS_DECLS}};
+    delete $params{FORCED_NS_DECLS};
+  }
 
   #
   # Push the current declaration state.
@@ -794,6 +800,16 @@ sub new {
         &{$processName}(\$_[0]->[$i], $_[0], 1);
       }
       $i += 2;
+    }
+
+    # We only do this for the outermost element
+    if (@forcedNSDecls) {
+      foreach (@forcedNSDecls) {
+        my @dummy = ($_, 'dummy');
+        my $d2 = \@dummy;
+        &{$processName}(\$d2, $_[0], 1);
+      }
+      @forcedNSDecls = ();
     }
   };
 
@@ -1048,6 +1064,14 @@ namespace URI in this hash, then the module will automatically
 generate prefixes of the form "__NS1", "__NS2", etc.
 
 To set the default namespace, use '' for the prefix.
+
+=item FORCED_NS_DECLS
+
+An array reference; if this parameter is present, the document element
+will contain declarations for all the given namespace URIs.
+Declaring namespaces in advance is particularly useful when a large
+number of elements from a namespace are siblings, but don't share a direct
+ancestor from the same namespace.
 
 =item NEWLINES
 
