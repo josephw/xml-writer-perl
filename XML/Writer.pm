@@ -48,7 +48,7 @@ sub new {
   my $unsafe = $params{UNSAFE};
   my $newlines = $params{NEWLINES};
   my $dataMode = $params{DATA_MODE};
-  my $dataIndent = $params{DATA_INDENT};
+  my $dataIndent = $params{DATA_INDENT} || 0;
 
                                 # If the NEWLINES parameter is specified,
                                 # set the $nl variable appropriately
