@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 123);
+use Test::More(tests => 132);
 
 
 # Catch warnings
@@ -984,6 +984,55 @@ TEST: {
 	checkResult(<<"EOS", "Deep-nesting, to exercise prefix management");
 <__NS1:element xmlns:__NS1="a"><__NS1:element><__NS2:element xmlns:__NS2="b"><__NS2:element><__NS3:element xmlns:__NS3="c"><__NS4:element xmlns:__NS4="d"></__NS4:element><__NS4:element xmlns:__NS4="d"></__NS4:element></__NS3:element></__NS2:element></__NS2:element></__NS1:element></__NS1:element>
 EOS
+};
+
+# Raw output.
+TEST: {
+	initEnv(UNSAFE => 1);
+	$w->startTag("foo");
+	$w->raw("<bar/>");
+	$w->endTag("foo");
+	$w->end();
+	checkResult("<foo><bar/></foo>\n", 'raw() should pass text through without escaping it');
+};
+
+# Attempting raw output in safe mode
+TEST: {
+	initEnv();
+	$w->startTag("foo");
+	expectError('raw\(\) is only available when UNSAFE is set', eval {
+		$w->raw("<bar/>");
+	});
+}
+
+# Inserting a CDATA section.
+TEST: {
+	initEnv();
+	$w->startTag("foo");
+	$w->cdata("cdata testing - test");
+	$w->endTag("foo");
+	$w->end();
+	checkResult("<foo><![CDATA[cdata testing - test]]></foo>\n",
+		'cdata() should create CDATA sections');
+};
+
+# Inserting CDATA containing CDATA delimeters ']]>'.
+TEST: {
+	initEnv();
+	$w->startTag("foo");
+	$w->cdata("This is a CDATA section <![CDATA[text]]>");
+	$w->endTag("foo");
+	$w->end();
+	checkResult("<foo><![CDATA[This is a CDATA section <![CDATA[text]]]]><![CDATA[>]]></foo>\n", 'If a CDATA section would be invalid, it should be split up');
+};
+
+# cdataElement().
+TEST: {
+	initEnv();
+	$w->cdataElement("foo", "hello", a => 'b');
+	$w->end();
+	checkResult(qq'<foo a="b"><![CDATA[hello]]></foo>\n',
+		'cdataElement should produce a valid element containing a CDATA section');
 };
 
 1;

@@ -336,7 +336,34 @@ sub new {
     }
   };
 
-  
+  my $raw = sub {
+    $output->print($_[0]);
+    # Don't set $hasData or any other information: we know nothing
+    # about what was just written.
+    #
+  };
+
+  my $SAFE_raw = sub {
+  	croak('raw() is only available when UNSAFE is set');
+  };
+
+  my $cdata = sub {
+      my $data = $_[0];
+      $data    =~ s/\]\]>/\]\]\]\]><!\[CDATA\[>/g;
+      $output->print("<![CDATA[$data]]>");
+      $hasData = 1;
+  };
+
+  my $SAFE_cdata = sub {
+    if ($elementLevel < 1) {
+      croak("Attempt to insert characters outside of document element");
+    } elsif ($dataMode && $hasElement) {
+      croak("Mixed content not allowed in data mode: characters");
+    } else {
+      &{$cdata};
+    }
+  };
+
                                 # Assign the correct closures based on
                                 # the UNSAFE parameter
   if ($unsafe) {
@@ -348,7 +375,10 @@ sub new {
              'STARTTAG' => $startTag,
              'EMPTYTAG' => $emptyTag,
              'ENDTAG' => $endTag,
-             'CHARACTERS' => $characters};
+             'CHARACTERS' => $characters,
+             'RAW' => $raw,
+             'CDATA' => $cdata
+            };
   } else {
     $self = {'END' => $SAFE_end,
              'XMLDECL' => $SAFE_xmlDecl,
@@ -358,7 +388,10 @@ sub new {
              'STARTTAG' => $SAFE_startTag,
              'EMPTYTAG' => $SAFE_emptyTag,
              'ENDTAG' => $SAFE_endTag,
-             'CHARACTERS' => $SAFE_characters};
+             'CHARACTERS' => $SAFE_characters,
+             'RAW' => $SAFE_raw,               # This will intentionally fail
+             'CDATA' => $SAFE_cdata
+            };
   }
 
                                 # Query methods
@@ -506,11 +539,37 @@ sub dataElement {
 }
 
 #
+# Write a simple CDATA element.
+#
+sub cdataElement {
+    my ($self, $name, $data, %atts) = (@_);
+    $self->startTag($name, %atts);
+    $self->cdata($data);
+    $self->endTag($name);
+}
+
+#
 # Write character data.
 #
 sub characters {
   my $self = shift;
   &{$self->{CHARACTERS}};
+}
+
+#
+# Write raw, unquoted, completely unchecked character data.
+#
+sub raw {
+  my $self = shift;
+  &{$self->{RAW}};
+}
+
+#
+# Write CDATA.
+#
+sub cdata {
+    my $self = shift;
+    &{$self->{CDATA}};
 }
 
 #
@@ -1223,6 +1282,29 @@ You may invoke this method only within the document element
 
 In data mode, you must not use this method to add whitespace between
 elements.
+
+=item raw($data)
+
+Print data completely unquoted and unchecked to the XML document.  For
+example C<raw('<')> will print a literal < character.  This
+necessarily bypasses all well-formedness checking, and is therefore
+only available in unsafe mode.
+
+This can sometimes be useful for printing entities which are defined
+for your XML format but the module doesn't know about, for example
+&nbsp; for XHTML.
+
+=item cdata($data)
+
+As C<characters()> but writes the data quoted in a CDATA section, that
+is, between <![CDATA[ and ]]>.  If the data to be written itself
+contains ]]>, it will be written as several consecutive CDATA
+sections.
+
+=item cdataElement($name, $data [, $aname1 => $value1, ...])
+
+As C<dataElement()> but the element content is written as one or more
+CDATA sections (see C<cdata()>).
 
 =item setOutput($output)
 
