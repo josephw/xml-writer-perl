@@ -33,16 +33,16 @@ $VERSION = "0.4.1";
 sub new {
   my ($class, %params) = (@_);
 
-				# If the user wants namespaces,
-				# intercept the request here; it will
-				# come back to this constructor
-				# from within XML::Writer::Namespaces::new()
+                                # If the user wants namespaces,
+                                # intercept the request here; it will
+                                # come back to this constructor
+                                # from within XML::Writer::Namespaces::new()
   if ($params{NAMESPACES}) {
     delete $params{NAMESPACES};
     return new XML::Writer::Namespaces(%params);
   }
 
-				# Set up $self and basic parameters
+                                # Set up $self and basic parameters
   my $self;
   my $output;
   my $unsafe = $params{UNSAFE};
@@ -50,15 +50,15 @@ sub new {
   my $dataMode = $params{DATA_MODE};
   my $dataIndent = $params{DATA_INDENT};
 
-				# If the NEWLINES parameter is specified,
-				# set the $nl variable appropriately
+                                # If the NEWLINES parameter is specified,
+                                # set the $nl variable appropriately
   my $nl = '';
   if ($newlines) {
     $nl = "\n";
   }
 
 
-				# Parse variables
+                                # Parse variables
   my @elementStack = ();
   my $elementLevel = 0;
   my %seen = ();
@@ -81,9 +81,9 @@ sub new {
     }
   };
 
-				# Method implementations: the SAFE_
-				# versions perform error checking
-				# and then call the regular ones.
+                                # Method implementations: the SAFE_
+                                # versions perform error checking
+                                # and then call the regular ones.
   my $end = sub {
     $output->print("\n");
   };
@@ -228,8 +228,8 @@ sub new {
       croak("Attempt to insert start tag after close of document element");
     } elsif ($elementLevel == 0 && $seen{DOCTYPE} && $name ne $seen{DOCTYPE}) {
       croak("Document element is \"$name\", but DOCTYPE is \""
-	    . $seen{DOCTYPE}
-	    . "\"");
+            . $seen{DOCTYPE}
+            . "\"");
     } elsif ($dataMode && $hasData) {
       croak("Mixed content not allowed in data mode: element $name");
     } else {
@@ -262,8 +262,8 @@ sub new {
       croak("Attempt to insert empty tag after close of document element");
     } elsif ($elementLevel == 0 && $seen{DOCTYPE} && $name ne $seen{DOCTYPE}) {
       croak("Document element is \"$name\", but DOCTYPE is \""
-	    . $seen{DOCTYPE}
-	    . "\"");
+            . $seen{DOCTYPE}
+            . "\"");
     } elsif ($dataMode && $hasData) {
       croak("Mixed content not allowed in data mode: element $name");
     } else {
@@ -323,31 +323,31 @@ sub new {
   };
 
   
-				# Assign the correct closures based on
-				# the UNSAFE parameter
+                                # Assign the correct closures based on
+                                # the UNSAFE parameter
   if ($unsafe) {
     $self = {'END' => $end,
-	     'XMLDECL' => $xmlDecl,
-	     'PI' => $pi,
-	     'COMMENT' => $comment,
-	     'DOCTYPE' => $doctype,
-	     'STARTTAG' => $startTag,
-	     'EMPTYTAG' => $emptyTag,
-	     'ENDTAG' => $endTag,
-	     'CHARACTERS' => $characters};
+             'XMLDECL' => $xmlDecl,
+             'PI' => $pi,
+             'COMMENT' => $comment,
+             'DOCTYPE' => $doctype,
+             'STARTTAG' => $startTag,
+             'EMPTYTAG' => $emptyTag,
+             'ENDTAG' => $endTag,
+             'CHARACTERS' => $characters};
   } else {
     $self = {'END' => $SAFE_end,
-	     'XMLDECL' => $SAFE_xmlDecl,
-	     'PI' => $SAFE_pi,
-	     'COMMENT' => $SAFE_comment,
-	     'DOCTYPE' => $SAFE_doctype,
-	     'STARTTAG' => $SAFE_startTag,
-	     'EMPTYTAG' => $SAFE_emptyTag,
-	     'ENDTAG' => $SAFE_endTag,
-	     'CHARACTERS' => $SAFE_characters};
+             'XMLDECL' => $SAFE_xmlDecl,
+             'PI' => $SAFE_pi,
+             'COMMENT' => $SAFE_comment,
+             'DOCTYPE' => $SAFE_doctype,
+             'STARTTAG' => $SAFE_startTag,
+             'EMPTYTAG' => $SAFE_emptyTag,
+             'ENDTAG' => $SAFE_endTag,
+             'CHARACTERS' => $SAFE_characters};
   }
 
-				# Query methods
+                                # Query methods
   $self->{'IN_ELEMENT'} = sub {
     my ($ancestor) = (@_);
     return $elementStack[$#elementStack] eq $ancestor;
@@ -371,19 +371,19 @@ sub new {
     return $elementStack[$#elementStack-$n];
   };
 
-				# Set and get the output destination.
+                                # Set and get the output destination.
   $self->{'GETOUTPUT'} = sub {
     return $output;
   };
 
   $self->{'SETOUTPUT'} = sub {
     my $newOutput = $_[0];
-				# If there is no OUTPUT parameter,
-				# use standard output
+                                # If there is no OUTPUT parameter,
+                                # use standard output
     unless ($newOutput) {
       $newOutput = new IO::Handle();
       $newOutput->fdopen(fileno(STDOUT), "w") ||
-	croak("Cannot write to standard output");
+        croak("Cannot write to standard output");
     }
     $output = $newOutput;
   };
@@ -404,10 +404,10 @@ sub new {
     return $dataIndent;
   };
 
-				# Set the output.
+                                # Set the output.
   &{$self->{'SETOUTPUT'}}($params{'OUTPUT'});
 
-				# Return the blessed object.
+                                # Return the blessed object.
   return bless $self, $class;
 }
 
@@ -657,8 +657,8 @@ sub new {
 
   my $unsafe = $params{UNSAFE};
 
-				# Snarf the prefix map, if any, and
-				# note the default prefix.
+                                # Snarf the prefix map, if any, and
+                                # note the default prefix.
   my %prefixMap = ();
   if ($params{PREFIX_MAP}) {
     %prefixMap = (%{$params{PREFIX_MAP}});
@@ -667,23 +667,23 @@ sub new {
   my $defaultPrefix = $prefixMap{''};
   delete $prefixMap{''};
 
-				# Generate the reverse map for URIs
+                                # Generate the reverse map for URIs
   my %uriMap = ();
   my $key;
   foreach $key (keys(%prefixMap)) {
     $uriMap{$prefixMap{$key}} = $key;
   }
 
-				# Create an instance of the parent.
+                                # Create an instance of the parent.
   my $self = new XML::Writer(%params);
 
-				# Snarf the parent's methods that we're
-				# going to override.
+                                # Snarf the parent's methods that we're
+                                # going to override.
   my $OLD_startTag = $self->{STARTTAG};
   my $OLD_emptyTag = $self->{EMPTYTAG};
   my $OLD_endTag = $self->{ENDTAG};
 
-				# State variables
+                                # State variables
   my $prefixCounter = 1;
   my @nsDecls = ();
   my $nsDecls = {};
@@ -732,28 +732,28 @@ sub new {
     my ($uri, $local) = @{$$nameref};
     my $prefix = $prefixMap{$uri};
 
-				# Is this an element name that matches
-				# the default NS?
+                                # Is this an element name that matches
+                                # the default NS?
     if (!$attFlag && ($uri eq $defaultPrefix)) {
       unless ($nsDefaultDecl) {
-	push @{$atts}, 'xmlns';
-	push @{$atts}, $uri;
-	$nsDefaultDecl = 1;
+        push @{$atts}, 'xmlns';
+        push @{$atts}, $uri;
+        $nsDefaultDecl = 1;
       }
       $$nameref = $local;
       
-				# Is there a straight-forward prefix?
+                                # Is there a straight-forward prefix?
     } elsif ($prefix) {
       unless ($nsDecls->{$uri}) {
-				# Copy on write (FIXME: duplicated)
-	unless ($nsCopyFlag) {
-	  $nsCopyFlag = 1;
-	  my %decls = (%{$nsDecls});
-	  $nsDecls = \%decls;
-	}
-	$nsDecls->{$uri} = $prefix;
-	push @{$atts}, "xmlns:$prefix";
-	push @{$atts}, $uri;
+                                # Copy on write (FIXME: duplicated)
+        unless ($nsCopyFlag) {
+          $nsCopyFlag = 1;
+          my %decls = (%{$nsDecls});
+          $nsDecls = \%decls;
+        }
+        $nsDecls->{$uri} = $prefix;
+        push @{$atts}, "xmlns:$prefix";
+        push @{$atts}, $uri;
       }
       $$nameref = "$prefix:$local";
 
@@ -762,9 +762,9 @@ sub new {
       $prefixMap{$uri} = $prefix;
       $uriMap{$prefix} = $uri;
       unless ($nsCopyFlag) {
-	$nsCopyFlag = 1;
-	my %decls = (%{$nsDecls});
-	$nsDecls = \%decls;
+        $nsCopyFlag = 1;
+        my %decls = (%{$nsDecls});
+        $nsDecls = \%decls;
       }
       $nsDecls->{$uri} = $prefix;
       push @{$atts}, "xmlns:$prefix";
@@ -784,7 +784,7 @@ sub new {
     my $i = 1;
     while ($_[0]->[$i]) {
       if (ref($_[0]->[$i]) eq 'ARRAY') {
-	&{$processName}(\$_[0]->[$i], $_[0], 1);
+        &{$processName}(\$_[0]->[$i], $_[0], 1);
       }
       $i += 2;
     }
@@ -837,7 +837,7 @@ sub new {
     $self->{PI} = sub {
       my $target = $_[0];
       if ($target =~ /:/) {
-	croak "PI target '$target' contains a colon.";
+        croak "PI target '$target' contains a colon.";
       }
       &{$OLD_pi};
     }
@@ -903,32 +903,32 @@ sub _checkNSNames {
   my $i = 1;
   my $name = $names->[0];
 
-				# Check the element name.
+                                # Check the element name.
   if (ref($name) eq 'ARRAY') {
     if ($name->[1] =~ /:/) {
       croak("Local part of element name '" .
-	    $name->[1] .
-	    "' contains a colon.");
+            $name->[1] .
+            "' contains a colon.");
     }
   } elsif ($name =~ /:/) {
     croak("Element name '$name' contains a colon.");
   }
 
-				# Check the attribute names.
+                                # Check the attribute names.
   while ($names->[$i]) {
     my $name = $names->[$i];
     if (ref($name) eq 'ARRAY') {
       my $local = $name->[1];
       if ($local =~ /:/) {
-	croak "Local part of attribute name '$local' contains a colon.";
+        croak "Local part of attribute name '$local' contains a colon.";
       }
     } else {
       if ($name =~ /^(xmlns|.*:)/) {
-	if ($name =~ /^xmlns/) {
-	  croak "Attribute name '$name' begins with 'xmlns'";
-	} elsif ($name =~ /:/) {
-	  croak "Attribute name '$name' contains ':'";
-	}
+        if ($name =~ /^xmlns/) {
+          croak "Attribute name '$name' begins with 'xmlns'";
+        } elsif ($name =~ /:/) {
+          croak "Attribute name '$name' contains ':'";
+        }
       }
     }
     $i += 2;
