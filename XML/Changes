@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::Writer.
 
+0.3 Thu Dec  9 12:49:28 EST 1999
+	- fixed frequently-reported attribute-list bug
+	- changed xmlDecl() so that first argument is the encoding
+	- added 'use IO;' to avoid errors
+	- documented the doctype() method
+
 0.2
 	- added Namespace support (XML::Writer::Namespaces subclass
 	  and NAMESPACES constructor parameter)

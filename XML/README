@@ -16,10 +16,14 @@ Here is an example:
 
 If necessary, error-checking can be turned off for production use.
 
-Version 0.2 also contains extensive Namespace support and some basic
-methods for querying the current element context.  See the Changes
-file for more information about differences from version 0.1, and the
-embedded POD documentation for information on using XML::Writer.
+Versions 0.2 and forward also contains extensive Namespace support and
+some basic methods for querying the current element context.  See the
+Changes file for more information about differences from version 0.1,
+and the embedded POD documentation for information on using
+XML::Writer.
+
+Version 0.3 includes some bug fixes and supports an explicit
+'encoding' parameter for the XML declaration.
 
 
 Copyright (c) 1999 by David Megginson <david@megginson.com>

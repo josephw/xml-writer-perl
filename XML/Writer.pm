@@ -3,7 +3,7 @@
 # Copyright (c) 1999 by Megginson Technologies.
 # No warranty.  Commercial and non-commercial use freely permitted.
 #
-# $Id: Writer.pm,v 0.3 1999/04/25 13:44:50 david Exp $
+# $Id: Writer.pm,v 0.3 1999/04/25 13:44:50 david Exp david $
 ########################################################################
 
 package XML::Writer;
@@ -13,8 +13,9 @@ require 5.004;
 use strict;
 use vars qw($VERSION);
 use Carp;
+use IO;
 
-$VERSION = "0.2";
+$VERSION = "0.3";
 
 
 
@@ -95,8 +96,12 @@ sub new {
   };
 
   my $xmlDecl = sub {
-    my $standalone = $_[0];
-    $output->print("<?xml version=\"1.0\" encoding=\"UTF-8\"");
+    my ($encoding, $standalone) = (@_);
+    $encoding = "UTF-8" unless $encoding;
+    $output->print("<?xml version=\"1.0\"");
+    if ($encoding) {
+      $output->print(" encoding=\"$encoding\"");
+    }
     if ($standalone) {
       $output->print(" standalone=\"$standalone\"");
     }
@@ -503,7 +508,7 @@ sub removePrefix {
 sub _checkAttributes {
   my %anames;
   my $i = 1;
-  while ($_->[$i]) {
+  while ($_[$i]) {
     my $name = $_[$i];
     $i += 2;
     if ($anames{$name}) {
@@ -956,14 +961,22 @@ closed:
 
   $writer->end();
 
-=item xmlDecl([$standalone])
+=item xmlDecl([$encoding, $standalone])
 
 Add an XML declaration to the beginning of an XML document.  The
-version will always be "1.0", and the encoding will always be "UTF-8".
-If you provide the $standalone argument, the module will include it as
-the value of the 'standalone' pseudo-attribute:
+version will always be "1.0".  If you provide a non-null encoding or
+standalone argument, its value will appear in the declaration.
 
-  $writer->xmlDecl();
+  $writer->xmlDecl("UTF-8");
+
+=item doctype($name, [$publicId, $systemId])
+
+Add a DOCTYPE declaration to an XML document.  The declaration must
+appear before the beginning of the root element.  If you provide a
+publicId, you must provide a systemId as well, but you may provide
+just a system ID.
+
+  $writer->doctype("html");
 
 =item comment($text)
 
