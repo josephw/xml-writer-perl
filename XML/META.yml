@@ -1,10 +1,20 @@
-# http://module-build.sourceforge.net/META-spec.html
+# http://module-build.sourceforge.net/META-spec-new.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+meta-spec:    1.1
 name:         XML-Writer
-version:      0.4.6
-version_from: Writer.pm
-installdirs:  site
-requires:
-
+version:      0.500
+abstract:     Easily generate well-formed, namespace-aware XML.
+authored_by:
+  - David Megginson <david@megginson.com>
+  - Ed Avis <ed@membled.com>
+  - Joseph Walton <joe@kafsemo.org>
+license:      perl
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+installdirs:  site
+
+no_index:
+  package:
+    - XML::Writer::Namespaces
+
+dynamic_config: 0
+generated_by: Hand
