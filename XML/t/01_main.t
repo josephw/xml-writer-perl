@@ -13,8 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 145);
-# use Test::More(tests => 137);
+use Test::More(tests => 147);
 
 
 # Catch warnings
@@ -1253,6 +1252,23 @@ TEST: {
 </doc>
 EOS
 };
+
+# Verify that PREFIX_MAP's default prefix is not ignored when
+#  a document element is from a different namespace
+TEST: {
+	initEnv(PREFIX_MAP => {'uri:test', ''},
+		FORCED_NS_DECLS => ['uri:test']
+	);
+
+	$w->emptyTag(['uri:test2', 'document']);
+
+	$w->end();
+
+	checkResult(<<"EOS", 'The default namespace declaration should be present and correct when the document element belongs to a different namespace');
+<__NS1:document xmlns:__NS1="uri:test2" xmlns="uri:test" />
+EOS
+};
+
 
 # Free test resources
 $outputFile->close() or die "Unable to close temporary file: $!";
