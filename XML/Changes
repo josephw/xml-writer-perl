@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::Writer.
 
+0.520 Wed Sep  1 16:18:46 BST 2004    <joe@kafsemo.org>
+	- Fixed bug with forced declaration of the default namespace (#7266)
+	- Removed dead code. Added copyright notices to pod.
+	- Improved test coverage
+
 0.510 Tue May 25 19:46:04 BST 2004    <joe@kafsemo.org>
 	- Permitted in-document namespace prefix control
 	- Don't reopen STDOUT for output (closes #6232)
