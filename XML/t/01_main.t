@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 162);
+use Test::More(tests => 164);
 
 
 # Catch warnings
@@ -1377,6 +1377,21 @@ TEST: {
 	is($s, "<x />\n", "Output should be stored in a scalar, if one is passed");
 };
 
+# Modify the scalar during capture
+TEST: {
+	my $s;
+
+	$w = new XML::Writer(OUTPUT => \$s);
+	$w->startTag('foo', bar => 'baz');
+	is($s, "<foo bar=\"baz\">", 'Scalars should be up-to-date during writing');
+
+	$s = '';
+	$w->dataElement('txt', 'blah');
+	$w->endTag('foo');
+	$w->end();
+
+	is($s, "<txt>blah</txt></foo>\n", 'Resetting the scalar should work properly');
+};
 
 # Free test resources
 $outputFile->close() or die "Unable to close temporary file: $!";
