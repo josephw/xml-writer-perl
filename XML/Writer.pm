@@ -664,6 +664,8 @@ sub new {
     %prefixMap = (%{$params{PREFIX_MAP}});
     delete $params{PREFIX_MAP};
   }
+  $prefixMap{'http://www.w3.org/XML/1998/namespace'} = 'xml';
+
   my $defaultPrefix = $prefixMap{''};
   delete $prefixMap{''};
 
@@ -686,7 +688,7 @@ sub new {
                                 # State variables
   my $prefixCounter = 1;
   my @nsDecls = ();
-  my $nsDecls = {};
+  my $nsDecls = {'http://www.w3.org/XML/1998/namespace' => 'xml'};
   my @nsDefaultDecl = ();
   my $nsDefaultDecl = undef;
   my @nsCopyFlag = ();
