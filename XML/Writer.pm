@@ -106,6 +106,10 @@ sub new {
     if ($standalone && $standalone ne 'no') {
       $standalone = 'yes';
     }
+
+    # This line is questionable, but changing current behaviour
+    # may be a bad idea. There seems to be a mismatch with the
+    # documentation, though.
     $encoding = "UTF-8" unless $encoding;
     $output->print("<?xml version=\"1.0\"");
     if ($encoding) {
