@@ -16,11 +16,15 @@ Here is an example:
 
 If necessary, error-checking can be turned off for production use.
 
-This release 0.4.1 fixes a warning about 'use IO' being deprecated.
+This release fixes various warnings, adds the FORCED_NS_DECLS
+argument and greatly improves test suite coverage thanks to Devel::Cover.
+
 See the Changes file for detailed changes between versions.
 
 Copyright (c) 1999 by David Megginson
 Small changes by Ed Avis, <ed@membled.com>
+Some fixes, and a rewritten test suite,
+copyright 2004 Joseph Walton <joe@kafsemo.org>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
