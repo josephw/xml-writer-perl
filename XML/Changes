@@ -1,5 +1,13 @@
 Revision history for Perl extension XML::Writer.
 
+0.4 Tue Apr  4 21:59:51 EDT 2000
+	- added support for a simple data mode (off by default), with
+	  no mixed content and automatic whitespace and indenting
+	- added get/setDataMode and get/setDataIndent methods
+	- added DATA_MODE and DATA_INDENT parameters to constructor
+	- added dataElement method for simple case (character data
+	  content only)
+
 0.3 Thu Dec  9 12:49:28 EST 1999
 	- fixed frequently-reported attribute-list bug
 	- changed xmlDecl() so that first argument is the encoding

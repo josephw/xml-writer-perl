@@ -3,7 +3,7 @@
 # Copyright (c) 1999 by Megginson Technologies.
 # No warranty.  Commercial and non-commercial use freely permitted.
 #
-# $Id: Writer.pm,v 0.3 1999/04/25 13:44:50 david Exp david $
+# $Id: Writer.pm,v 0.4 2000/04/05 02:23:34 david Exp $
 ########################################################################
 
 package XML::Writer;
@@ -15,7 +15,7 @@ use vars qw($VERSION);
 use Carp;
 use IO;
 
-$VERSION = "0.3";
+$VERSION = "0.4";
 
 
 
@@ -48,6 +48,8 @@ sub new {
   my $output;
   my $unsafe = $params{UNSAFE};
   my $newlines = $params{NEWLINES};
+  my $dataMode = $params{DATA_MODE};
+  my $dataIndent = $params{DATA_INDENT};
 
 				# If the NEWLINES parameter is specified,
 				# set the $nl variable appropriately
@@ -61,6 +63,11 @@ sub new {
   my @elementStack = ();
   my $elementLevel = 0;
   my %seen = ();
+
+  my $hasData = 0;
+  my @hasDataStack = ();
+  my $hasElement = 0;
+  my @hasElementStack = ();
 
   #
   # Private method to show attributes.
@@ -97,6 +104,9 @@ sub new {
 
   my $xmlDecl = sub {
     my ($encoding, $standalone) = (@_);
+    if ($standalone && $standalone ne 'no') {
+      $standalone = 'yes';
+    }
     $encoding = "UTF-8" unless $encoding;
     $output->print("<?xml version=\"1.0\"");
     if ($encoding) {
@@ -192,11 +202,22 @@ sub new {
 
   my $startTag = sub {
     my $name = $_[0];
+    if ($dataMode) {
+      $output->print("\n");
+      $output->print(" " x ($elementLevel * $dataIndent));
+    }
     $elementLevel++;
     push @elementStack, $name;
     $output->print("<$name");
     &{$showAttributes}(\@_);
     $output->print("$nl>");
+    if ($dataMode) {
+      $hasElement = 1;
+      push @hasDataStack, $hasData;
+      $hasData = 0;
+      push @hasElementStack, $hasElement;
+      $hasElement = 0;
+    }
   };
 
   my $SAFE_startTag = sub {
@@ -210,6 +231,8 @@ sub new {
       croak("Document element is \"$name\", but DOCTYPE is \""
 	    . $seen{DOCTYPE}
 	    . "\"");
+    } elsif ($dataMode && $hasData) {
+      croak("Mixed content not allowed in data mode: element $name");
     } else {
       $seen{ANYTHING} = 1;
       $seen{ELEMENT} = 1;
@@ -219,9 +242,16 @@ sub new {
 
   my $emptyTag = sub {
     my $name = $_[0];
+    if ($dataMode) {
+      $output->print("\n");
+      $output->print(" " x ($elementLevel * $dataIndent));
+    }
     $output->print("<$name");
     &{$showAttributes}(\@_);
     $output->print("$nl />");
+    if ($dataMode) {
+      $hasElement = 1;
+    }
   };
 
   my $SAFE_emptyTag = sub {
@@ -235,6 +265,8 @@ sub new {
       croak("Document element is \"$name\", but DOCTYPE is \""
 	    . $seen{DOCTYPE}
 	    . "\"");
+    } elsif ($dataMode && $hasData) {
+      croak("Mixed content not allowed in data mode: element $name");
     } else {
       $seen{ANYTHING} = 1;
       $seen{ELEMENT} = 1;
@@ -247,7 +279,15 @@ sub new {
     my $currentName = pop @elementStack;
     $name = $currentName unless $name;
     $elementLevel--;
+    if ($dataMode && $hasElement) {
+      $output->print("\n");
+      $output->print(" " x ($elementLevel * $dataIndent));
+    }
     $output->print("</$name$nl>");
+    if ($dataMode) {
+      $hasData = pop @hasDataStack;
+      $hasElement = pop @hasElementStack;
+    }
   };
 
   my $SAFE_endTag = sub {
@@ -270,11 +310,14 @@ sub new {
       $data =~ s/\>/\&gt\;/g;
     }
     $output->print($data);
+    $hasData = 1;
   };
 
   my $SAFE_characters = sub {
     if ($elementLevel < 1) {
       croak("Attempt to insert characters outside of document element");
+    } elsif ($dataMode && $hasElement) {
+      croak("Mixed content not allowed in data mode: characters");
     } else {
       &{$characters};
     }
@@ -284,34 +327,34 @@ sub new {
 				# Assign the correct closures based on
 				# the UNSAFE parameter
   if ($unsafe) {
-    $self = {END => $end,
-	     XMLDECL => $xmlDecl,
-	     PI => $pi,
-	     COMMENT => $comment,
-	     DOCTYPE => $doctype,
-	     STARTTAG => $startTag,
-	     EMPTYTAG => $emptyTag,
-	     ENDTAG => $endTag,
-	     CHARACTERS => $characters};
+    $self = {'END' => $end,
+	     'XMLDECL' => $xmlDecl,
+	     'PI' => $pi,
+	     'COMMENT' => $comment,
+	     'DOCTYPE' => $doctype,
+	     'STARTTAG' => $startTag,
+	     'EMPTYTAG' => $emptyTag,
+	     'ENDTAG' => $endTag,
+	     'CHARACTERS' => $characters};
   } else {
-    $self = {END => $SAFE_end,
-	     XMLDECL => $SAFE_xmlDecl,
-	     PI => $SAFE_pi,
-	     COMMENT => $SAFE_comment,
-	     DOCTYPE => $SAFE_doctype,
-	     STARTTAG => $SAFE_startTag,
-	     EMPTYTAG => $SAFE_emptyTag,
-	     ENDTAG => $SAFE_endTag,
-	     CHARACTERS => $SAFE_characters};
+    $self = {'END' => $SAFE_end,
+	     'XMLDECL' => $SAFE_xmlDecl,
+	     'PI' => $SAFE_pi,
+	     'COMMENT' => $SAFE_comment,
+	     'DOCTYPE' => $SAFE_doctype,
+	     'STARTTAG' => $SAFE_startTag,
+	     'EMPTYTAG' => $SAFE_emptyTag,
+	     'ENDTAG' => $SAFE_endTag,
+	     'CHARACTERS' => $SAFE_characters};
   }
 
 				# Query methods
-  $self->{IN_ELEMENT} = sub {
+  $self->{'IN_ELEMENT'} = sub {
     my ($ancestor) = (@_);
     return $elementStack[$#elementStack] eq $ancestor;
   };
 
-  $self->{WITHIN_ELEMENT} = sub {
+  $self->{'WITHIN_ELEMENT'} = sub {
     my ($ancestor) = (@_);
     my $el;
     foreach $el (@elementStack) {
@@ -320,21 +363,21 @@ sub new {
     return 0;
   };
 
-  $self->{CURRENT_ELEMENT} = sub {
+  $self->{'CURRENT_ELEMENT'} = sub {
     return $elementStack[$#elementStack];
   };
 
-  $self->{ANCESTOR} = sub {
+  $self->{'ANCESTOR'} = sub {
     my ($n) = (@_);
     return $elementStack[$#elementStack-$n];
   };
 
 				# Set and get the output destination.
-  $self->{GETOUTPUT} = sub {
+  $self->{'GETOUTPUT'} = sub {
     return $output;
   };
 
-  $self->{SETOUTPUT} = sub {
+  $self->{'SETOUTPUT'} = sub {
     my $newOutput = $_[0];
 				# If there is no OUTPUT parameter,
 				# use standard output
@@ -346,8 +389,24 @@ sub new {
     $output = $newOutput;
   };
 
+  $self->{'SETDATAMODE'} = sub {
+    $dataMode = $_[0];
+  };
+
+  $self->{'GETDATAMODE'} = sub {
+    return $dataMode;
+  };
+
+  $self->{'SETDATAINDENT'} = sub {
+    $dataIndent = $_[0];
+  };
+
+  $self->{'GETDATAINDENT'} = sub {
+    return $dataIndent;
+  };
+
 				# Set the output.
-  &{$self->{SETOUTPUT}}($params{OUTPUT});
+  &{$self->{'SETOUTPUT'}}($params{'OUTPUT'});
 
 				# Return the blessed object.
   return bless $self, $class;
@@ -424,6 +483,16 @@ sub endTag {
 }
 
 #
+# Write a simple data element.
+#
+sub dataElement {
+  my ($self, $name, $data, %atts) = (@_);
+  $self->startTag($name, %atts);
+  $self->characters($data);
+  $self->endTag($name);
+}
+
+#
 # Write character data.
 #
 sub characters {
@@ -478,6 +547,41 @@ sub getOutput {
 sub setOutput {
   my $self = shift;
   return &{$self->{SETOUTPUT}};
+}
+
+#
+# Set the current data mode (true or false).
+#
+sub setDataMode {
+  my $self = shift;
+  return &{$self->{SETDATAMODE}};
+}
+
+
+#
+# Get the current data mode (true or false).
+#
+sub getDataMode {
+  my $self = shift;
+  return &{$self->{GETDATAMODE}};
+}
+
+
+#
+# Set the current data indent step.
+#
+sub setDataIndent {
+  my $self = shift;
+  return &{$self->{SETDATAINDENT}};
+}
+
+
+#
+# Get the current data indent step.
+#
+sub getDataIndent {
+  my $self = shift;
+  return &{$self->{GETDATAINDENT}};
 }
 
 
@@ -877,6 +981,10 @@ processing mode.  In Namespace mode, the module will generate
 Namespace Declarations itself, and will perform additional checks on
 the output.
 
+Additional support is available for a simplified data mode with no
+mixed content: newlines are automatically inserted around elements and
+elements can optionally be indented based as their nesting level.
+
 
 =head1 METHODS
 
@@ -951,6 +1059,20 @@ If the parameter is not present, the module will perform the
 well-formedness error checking by default.  Turn off error checking at
 your own risk!
 
+=item DATA_MODE
+
+A true or false value; if this parameter is present and its value is
+true, then the module will enter a special data mode, inserting
+newlines automatically around elements and (unless UNSAFE is also
+specified) reporting an error if any element has both characters and
+elements as content.
+
+=item DATA_INDENT
+
+A numeric value; if this parameter is present, it represents the
+indent step for elements in data mode (it will be ignored when not in
+data mode).
+
 =back
 
 =item end()
@@ -965,7 +1087,9 @@ closed:
 
 Add an XML declaration to the beginning of an XML document.  The
 version will always be "1.0".  If you provide a non-null encoding or
-standalone argument, its value will appear in the declaration.
+standalone argument, its value will appear in the declaration (and
+non-null value for standalone except 'no' will automatically be
+converted to 'yes').
 
   $writer->xmlDecl("UTF-8");
 
@@ -1037,6 +1161,15 @@ supply the name of the currently open element:
   $writer->startTag('p');
   $writer->endTag();
 
+=item dataElement($name, $data [, $aname1 => $value1, ...])
+
+Print an entire element containing only character data.  This is
+equivalent to
+
+  $writer->startTag($name [, $aname1 => $value1, ...]);
+  $writer->characters($data);
+  $writer->endTag($name);
+
 =item characters($data)
 
 Add character data to an XML document.  All '<', '>', and '&'
@@ -1048,6 +1181,40 @@ the predefined XML entities:
 
 You may invoke this method only within the document element
 (i.e. after the first start tag and before the last end tag).
+
+In data mode, you must not use this method to add whitespace between
+elements.
+
+=item setOutput($output)
+
+Set the current output destination, as in the OUTPUT parameter for the
+constructor.
+
+=item getOutput()
+
+Return the current output destination, as in the OUTPUT parameter for
+the constructor.
+
+=item setDataMode($mode)
+
+Enable or disable data mode, as in the DATA_MODE parameter for the
+constructor.
+
+=item getDataMode()
+
+Return the current data mode, as in the DATA_MODE parameter for the
+constructor.
+
+=item setDataIndent($step)
+
+Set the indent step for data mode, as in the DATA_INDENT parameter for
+the constructor.
+
+=item getDataIndent()
+
+Return the indent step for data mode, as in the DATA_INDENT parameter
+for the constructor.
+
 
 =back
 
