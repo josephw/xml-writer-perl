@@ -21,8 +21,8 @@ argument and greatly improves test suite coverage thanks to Devel::Cover.
 
 See the Changes file for detailed changes between versions.
 
-Copyright (c) 1999 by David Megginson
-Small changes by Ed Avis, <ed@membled.com>
+Copyright (c) 1999 by David Megginson,
+copyright 2003 Ed Avis, <ed@membled.com> and others.
 Some fixes, and a rewritten test suite,
 copyright 2004 Joseph Walton <joe@kafsemo.org>
 
