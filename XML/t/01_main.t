@@ -47,7 +47,7 @@ my $outputFile = IO::File->new_tmpfile or die "Unable to create temporary file: 
 sub getBufStr()
 {
 	local($/);
-	binmode($outputFile, ':bytes');
+	binmode($outputFile, ':bytes') if $] >= 5.008;
 	$outputFile->seek(0, 0);
 	return <$outputFile>;
 }
@@ -1341,7 +1341,7 @@ TEST: {
 };
 
 # Make sure UTF-8 is written properly
-TEST: {
+SKIP: {
 	skip 'Unicode only supported with Perl >= 5.8', 2 unless $] >= 5.008;
 
 	initEnv(ENCODING => 'utf-8', DATA_MODE => 1);
