@@ -950,7 +950,7 @@ XML::Writer - Perl extension for writing XML documents.
 =head1 SYNOPSIS
 
   use XML::Writer;
-  use IO;
+  use IO::File;
 
   my $output = new IO::File(">output.xml");
 
