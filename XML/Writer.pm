@@ -828,7 +828,7 @@ sub new {
       $nsDecls->{$uri} = '';
       unless ($nsCopyFlag) {
         $uriMap = {%{$uriMap}};
-		$nsDecls = {%{$nsDecls}};
+        $nsDecls = {%{$nsDecls}};
         $nsCopyFlag = 1;
       }
       $uriMap->{''} = $uri;
@@ -839,7 +839,7 @@ sub new {
                                 # Copy on write (FIXME: duplicated)
         unless ($nsCopyFlag) {
           $uriMap = {%{$uriMap}};
-		  $nsDecls = {%{$nsDecls}};
+          $nsDecls = {%{$nsDecls}};
           $nsCopyFlag = 1;
         }
         $nsDecls->{$uri} = $prefix;
