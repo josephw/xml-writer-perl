@@ -397,7 +397,7 @@ sub new {
     unless ($newOutput) {
       $newOutput = new IO::Handle();
       $newOutput->fdopen(fileno(STDOUT), "w") ||
-        croak("Cannot write to standard output");
+        croak("Cannot write to standard output: $!");
     }
     $output = $newOutput;
   };
