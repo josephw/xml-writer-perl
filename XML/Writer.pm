@@ -616,8 +616,8 @@ sub removePrefix {
 sub _checkAttributes {
   my %anames;
   my $i = 1;
-  while ($_[$i]) {
-    my $name = $_[$i];
+  while ($_[0]->[$i]) {
+    my $name = $_[0]->[$i];
     $i += 2;
     if ($anames{$name}) {
       croak("Two attributes named \"$name\"");
