@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::Writer.
 
+0.500 Sat Mar  6 22:45:54 GMT 2004    <joe@kafsemo.org>
+	- Prepared metadata for a consistent, CPAN-friendly 0.500 release
+	- Added a META.yml to prevent XML::Writer::Namespaces from
+	  being indexed
+	- Writer.pm: Removed a duplicate check for valid attribute names
+	- test.pl: Added more tests for full coverage of the cdata method
+
 0.4.6 Tue Mar  2 16:54:04 GMT 2004    <joe@kafsemo.org>
 	- test.pl: Revert to using a temporary file, rather than an
 	  IO::String, for compatibility with older Perls
