@@ -146,7 +146,7 @@ sub new {
       carp("Processing instruction target begins with 'xml'");
     } 
 
-    if ($name =~ /\?\>/ || $data =~ /\?\>/) {
+    if ($name =~ /\?\>/ || (defined($data) && $data =~ /\?\>/)) {
       croak("Processing instruction may not contain '?>'");
     } else {
       &{$pi};
