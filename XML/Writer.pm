@@ -1128,7 +1128,7 @@ converted to 'yes').
 Add a DOCTYPE declaration to an XML document.  The declaration must
 appear before the beginning of the root element.  If you provide a
 publicId, you must provide a systemId as well, but you may provide
-just a system ID.
+just a system ID by passing 'undef' for the publicId.
 
   $writer->doctype("html");
 
