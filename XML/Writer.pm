@@ -1,7 +1,7 @@
 ########################################################################
 # Writer.pm - write an XML document.
 # Copyright (c) 1999 by Megginson Technologies.
-# Copyright (c) 2004 by Joseph Walton <joe@kafsemo.org>.
+# Copyright (c) 2004, 2005 by Joseph Walton <joe@kafsemo.org>.
 # No warranty.  Commercial and non-commercial use freely permitted.
 #
 # $Id$
@@ -58,6 +58,7 @@ sub new {
     $nl = "\n";
   }
 
+  my $outputEncoding = $params{ENCODING};
 
                                 # Parse variables
   my @elementStack = ();
@@ -113,7 +114,7 @@ sub new {
     # This line is questionable, but changing current behaviour
     # may be a bad idea. There seems to be a mismatch with the
     # documentation, though.
-    $encoding = "UTF-8" unless $encoding;
+    $encoding ||= $outputEncoding || "UTF-8";
     $output->print("<?xml version=\"1.0\"");
     if ($encoding) {
       $output->print(" encoding=\"$encoding\"");
@@ -430,6 +431,12 @@ sub new {
                                 # If there is no OUTPUT parameter,
                                 # use standard output
     $output = $newOutput || \*STDOUT;
+    if ($outputEncoding) {
+      if (lc($outputEncoding) ne 'utf-8') {
+        die 'The only supported encoding is utf-8';
+      }
+      binmode($output, ':encoding(utf-8)');
+    }
   };
 
   $self->{'SETDATAMODE'} = sub {
@@ -1196,6 +1203,12 @@ elements as content.
 A numeric value; if this parameter is present, it represents the
 indent step for elements in data mode (it will be ignored when not in
 data mode).
+
+=item ENCODING
+
+A character encoding; currently this must be exactly 'utf-8'. If present,
+it will be used for the underlying character encoding and as the
+default in the XML declaration.
 
 =back
 
