@@ -12,9 +12,6 @@ license:      perl
 distribution_type: module
 installdirs:  site
 
-requires:
-  perl: '!= 5.006000'
-
 no_index:
   package:
     - XML::Writer::Namespaces
