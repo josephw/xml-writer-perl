@@ -14,7 +14,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 use IO::Handle;
-$VERSION = "0.4.5";
+$VERSION = "0.4.6";
 
 
 
