@@ -550,6 +550,23 @@ TEST: {
   });
 };
 
+# Test 44: inserting cdata ( character data )
+TEST: {
+  $writer->startTag("foo");
+  $writer->cData("cdata testing - test44");
+  $writer->endTag("foo");
+  $writer->end();
+  checkResult(44, "<foo><![CDATA[cdata testing - test44]]></foo>\n");
+};
+
+# Test 45: inserting cdata containing cdata delimeters ']]>'
+TEST: {
+  $writer->startTag("foo");
+  $writer->cData("This is a CDATA section <![CDATA[text]]>");
+  $writer->endTag("foo");
+  $writer->end();
+  checkResult(45, "<foo><![CDATA[This is a CDATA section <![CDATA[text]]]]><![CDATA[>]]></foo>\n");
+};
 1;
 
 __END__

@@ -322,6 +322,23 @@ sub new {
     }
   };
 
+   my $cData = sub {
+      my $data = $_[0];
+      $data    =~ s/\]\]>/\]\]\]\]><!\[CDATA\[>/g;
+      $output->print("<![CDATA[$data]]>");
+      $hasData = 1;
+  };
+
+  my $SAFE_cData = sub {
+    if ($elementLevel < 1) {
+      croak("Attempt to insert characters outside of document element");
+    } elsif ($dataMode && $hasElement) {
+      croak("Mixed content not allowed in data mode: characters");
+    } else {
+      &{$cData};
+    }
+  };
+
   
 				# Assign the correct closures based on
 				# the UNSAFE parameter
@@ -334,7 +351,8 @@ sub new {
 	     'STARTTAG' => $startTag,
 	     'EMPTYTAG' => $emptyTag,
 	     'ENDTAG' => $endTag,
-	     'CHARACTERS' => $characters};
+             'CHARACTERS' => $characters,
+             'CDATA' => $cData};
   } else {
     $self = {'END' => $SAFE_end,
 	     'XMLDECL' => $SAFE_xmlDecl,
@@ -344,7 +362,8 @@ sub new {
 	     'STARTTAG' => $SAFE_startTag,
 	     'EMPTYTAG' => $SAFE_emptyTag,
 	     'ENDTAG' => $SAFE_endTag,
-	     'CHARACTERS' => $SAFE_characters};
+             'CHARACTERS' => $SAFE_characters,
+             'CDATA' => $SAFE_cData};
   }
 
 				# Query methods
@@ -492,11 +511,29 @@ sub dataElement {
 }
 
 #
+# Write a simple CDATA element.
+#
+sub cdataElement {
+    my ($self, $name, $data, %atts) = (@_);
+    $self->startTag($name, %atts);
+    $self->cData($data);
+    $self->endTag($name);
+}
+
+#
 # Write character data.
 #
 sub characters {
   my $self = shift;
   &{$self->{CHARACTERS}};
+}
+
+#
+# Write CDATA.
+#
+sub cData {
+    my $self = shift;
+    &{$self->{CDATA}};
 }
 
 #
