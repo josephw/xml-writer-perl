@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Writer.
 
+0.4.6 Tue Mar  2 16:54:04 GMT 2004    <joe@kafsemo.org>
+	- test.pl: Revert to using a temporary file, rather than an
+	  IO::String, for compatibility with older Perls
+
 0.4.5 Mon Mar  1 14:46:47 GMT 2004    <joe@kafsemo.org>
 	- added FORCED_NS_DECLS parameter, to declare namespaces ahead of use
 	- fixed check for duplicate attributes
