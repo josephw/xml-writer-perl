@@ -666,15 +666,15 @@ sub new {
   }
   $prefixMap{'http://www.w3.org/XML/1998/namespace'} = 'xml';
 
-  my $defaultPrefix = $prefixMap{''};
-  delete $prefixMap{''};
-
                                 # Generate the reverse map for URIs
   my %uriMap = ();
   my $key;
   foreach $key (keys(%prefixMap)) {
     $uriMap{$prefixMap{$key}} = $key;
   }
+
+  my $defaultPrefix = $uriMap{''};
+  delete $prefixMap{$defaultPrefix} if ($defaultPrefix);
 
                                 # Create an instance of the parent.
   my $self = new XML::Writer(%params);
