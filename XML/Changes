@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::Writer.
 
+0.530 Tue Feb  1 13:09:31 GMT 2005    <joe@kafsemo.org>
+	- Allow scalar references for the OUTPUT parameter, inspired by
+	   Simon Oliver's XML::Writer::String (patch from Yanick Champoux)
+	- Added ENCODING parameter; currently only UTF-8 is supported
+	- Escape newlines in attribute values
+
 0.520 Wed Sep  1 16:18:46 BST 2004    <joe@kafsemo.org>
 	- Fixed bug with forced declaration of the default namespace (#7266)
 	- Removed dead code. Added copyright notices to pod.
