@@ -880,12 +880,17 @@ sub new {
       $i += 2;
     }
 
-    # We only do this for the outermost element
+    # We do this if any declarations are forced, due either to
+    #  constructor arguments or to a call during processing.
     if (@forcedNSDecls) {
       foreach (@forcedNSDecls) {
         my @dummy = ($_, 'dummy');
         my $d2 = \@dummy;
-        &{$processName}(\$d2, $_[0], 1);
+        if ($defaultPrefix && ($_ eq $defaultPrefix)) {
+          &{$processName}(\$d2, $_[0], 0);
+        } else {
+          &{$processName}(\$d2, $_[0], 1);
+        }
       }
       @forcedNSDecls = ();
     }
