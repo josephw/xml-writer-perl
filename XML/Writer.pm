@@ -344,7 +344,7 @@ sub new {
   };
 
   my $SAFE_raw = sub {
-  	croak('raw() is only available when UNSAFE is set');
+    croak('raw() is only available when UNSAFE is set');
   };
 
   my $cdata = sub {
@@ -427,12 +427,7 @@ sub new {
     my $newOutput = $_[0];
                                 # If there is no OUTPUT parameter,
                                 # use standard output
-    unless ($newOutput) {
-      $newOutput = new IO::Handle();
-      $newOutput->fdopen(fileno(STDOUT), "w") ||
-        croak("Cannot write to standard output: $!");
-    }
-    $output = $newOutput;
+    $output = $newOutput || \*STDOUT;
   };
 
   $self->{'SETDATAMODE'} = sub {
@@ -1353,7 +1348,7 @@ Return a true value if the most recent open element matches $name:
 
 =item within_element($name)
 
-Return a true value if any open elemnet matches $name:
+Return a true value if any open element matches $name:
 
   if ($writer->within_element('body')) {
     $writer->startTag('h1');
