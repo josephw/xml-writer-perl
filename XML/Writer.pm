@@ -148,6 +148,8 @@ sub new {
 
     if ($name =~ /\?\>/ || (defined($data) && $data =~ /\?\>/)) {
       croak("Processing instruction may not contain '?>'");
+    } elsif ($name =~ /\s/) {
+      croak("Processing instruction name may not contain whitespace");
     } else {
       &{$pi};
     }
