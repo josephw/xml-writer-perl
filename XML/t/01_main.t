@@ -8,8 +8,8 @@
 # $Id$
 ########################################################################
 
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.pl'
+# Before 'make install' is performed this script should be runnable with
+# 'make test'. After 'make install' it should work as 'perl 01_main.t'
 
 use strict;
 
@@ -79,7 +79,32 @@ sub checkResult($$)
 {
 	my ($expected, $explanation) = (@_);
 
-	is(getBufStr(), $expected, $explanation);
+	my $actual = getBufStr();
+
+	if ($expected eq $actual) {
+		ok(1, $explanation);
+	} else {
+		my @e = split(/\n/, $expected);
+		my @a = split(/\n/, $actual);
+
+		if (@e + @a == 2) {
+			is(getBufStr(), $expected, $explanation);
+		} else {
+			if (eval {require Algorithm::Diff;}) {
+				fail($explanation);
+
+				Algorithm::Diff::traverse_sequences( \@e, \@a, {
+					MATCH => sub { diag(" $e[$_[0]]\n"); },
+					DISCARD_A => sub { diag("-$e[$_[0]]\n"); },
+					DISCARD_B => sub { diag("+$a[$_[1]]\n"); }
+				});
+			} else {
+				diag("         got: '$actual'\n");
+				diag("    expected: '$expected'\n");
+			}
+		}
+	}
+
 	wasNoWarning('Expected result tests should not cause warnings');
 }
 
