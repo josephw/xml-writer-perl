@@ -1,0 +1,12 @@
+- Character encoding is one of the simplest things to get wrong; this module
+	should help guide users along the right path. This is much simpler
+	in the Unicode-aware Perls. Should this module drop support for
+	everything prior to 5.6, or degrade as gracefully as possible?
+
+- Correctness. It's still possible to generate bad XML. Especially in
+	safe mode, checks on processing instructions, comments and DOCTYPE
+	declarations should be rigorously matched against the spec.
+
+- Control over presentation. How much is too much? Entities vs. CDATA,
+	placement of namespace declarations, whitespace. How much control
+	should the user be given?
