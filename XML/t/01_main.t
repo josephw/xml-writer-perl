@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 154);
+use Test::More(tests => 158);
 
 
 # Catch warnings
@@ -1305,6 +1305,38 @@ TEST: {
 	$w->setOutput();
 
 	is($w->getOutput(), \*STDOUT, 'If no output is given, STDOUT should be used');
+};
+
+# Create an ill-formed document using unsafe mode
+TEST: {
+	initEnv(UNSAFE => 1);
+
+	$w->xmlDecl('us-ascii');
+	$w->comment("--");
+	$w->characters("Test\n");
+	$w->cdata("Test\n");
+	$w->doctype('y', undef, '/');
+	$w->emptyTag('x');
+	$w->end();
+	checkResult(<<EOR, 'Unsafe mode should not enforce validity tests.');
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- -- -->
+Test
+<![CDATA[Test
+]]><!DOCTYPE y SYSTEM "/">
+<x />
+EOR
+
+};
+
+# Ensure that newlines in attributes are escaped
+TEST: {
+	initEnv();
+
+	$w->emptyTag('x', 'a' => "A\nB");
+	$w->end();
+
+	checkResult("<x a=\"A&#10;B\" />\n", 'Newlines in attribute values should be escaped');
 };
 
 
