@@ -5,4 +5,5 @@ Makefile.PL
 META.yml
 Writer.pm
 t/01_main.t
+t/02_string.t
 TODO

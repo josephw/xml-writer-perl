@@ -15,7 +15,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 use IO::Handle;
-$VERSION = "0.520";
+$VERSION = "0.521";
 
 
 
@@ -426,9 +426,18 @@ sub new {
 
   $self->{'SETOUTPUT'} = sub {
     my $newOutput = $_[0];
+
+   if( $newOutput ) {
+      $output = ref $newOutput eq 'SCALAR' ? 
+                               XML::Writer::String->new( $newOutput )
+                               : $newOutput;
+   }
+   else {
                                 # If there is no OUTPUT parameter,
                                 # use standard output
-    $output = $newOutput || \*STDOUT;
+      $output = \*STDOUT;
+   }
+    return $output;
   };
 
   $self->{'SETDATAMODE'} = sub {
@@ -1051,6 +1060,32 @@ sub forceNSDecl
   return &{$self->{FORCENSDECL}};
 }
 
+package XML::Writer::String;
+
+# internal class enabling the possiblity to write the xml 
+# to a string instead than to a filehandle
+#
+# heavily inspired by Simon Olivier's XML::Writer::String
+
+sub new {
+	my $class = shift;
+	my $scalar_ref = shift;
+	my $self = bless $scalar_ref, $class;
+	$self->value(@_) if @_;
+	return $self;
+}
+
+sub print {
+	my $self = shift;
+	$$self .= join '', @_;
+	return scalar(@_);
+}
+
+sub value {
+	my $self = shift;
+	@_ ? $$self = join('', @_) : $$self;
+}
+
 
 1;
 __END__
@@ -1120,8 +1155,8 @@ Arguments are an anonymous hash array of parameters:
 =item OUTPUT
 
 An object blessed into IO::Handle or one of its subclasses (such as
-IO::File); if this parameter is not present, the module will write to
-standard output.
+IO::File), or a reference to a string; if this parameter is not present, 
+the module will write to standard output.
 
 =item NAMESPACES
 

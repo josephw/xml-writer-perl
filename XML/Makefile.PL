@@ -7,7 +7,7 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'    => 'XML::Writer',
-    'VERSION' => '0.520',
+    'VERSION' => '0.521',
 
     # A manually-created META.yml has all the other metadata;
     #  we don't want it overwritten
