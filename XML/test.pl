@@ -36,21 +36,32 @@ require XML::Writer;
 
 wasNoWarning('Loading XML::Writer should not result in warnings');
 
-use IO::String;
+use IO::File;
 
 # The XML::Writer that will be used
 my $w;
 
-my $bufStr;
+my $outputFile = IO::File->new_tmpfile or die "Unable to create temporary file: $!";
+
+# Fetch the current contents of the scratch file as a scalar
+sub getBufStr()
+{
+	local($/);
+	$outputFile->seek(0, 0);
+	return <$outputFile>;
+}
 
 # Set up the environment to run a test.
 sub initEnv(@)
 {
 	my (%args) = @_;
-	$bufStr = '';
 
-	# Overwrite OUTPUT so it goes to the buffer string
-	$args{'OUTPUT'} = new IO::String($bufStr);
+	# Reset the scratch file
+	$outputFile->seek(0, 0);
+	$outputFile->truncate(0);
+
+	# Overwrite OUTPUT so it goes to the scratch file
+	$args{'OUTPUT'} = $outputFile;
 
 	# Set NAMESPACES, unless it's present
 	$args{'NAMESPACES'} = 1 unless(defined($args{'NAMESPACES'}));
@@ -68,7 +79,7 @@ sub checkResult($$)
 {
 	my ($expected, $explanation) = (@_);
 
-	is($bufStr, $expected, $explanation);
+	is(getBufStr(), $expected, $explanation);
 	wasNoWarning('Expected result tests should not cause warnings');
 }
 
@@ -87,7 +98,7 @@ sub expectError($$) {
 			diag($@);
 		} else {
 			diag('(no error)');
-			diag($bufStr);
+			diag(getBufStr());
 		}
 	}
 }
@@ -674,9 +685,9 @@ TEST: {
 	$w->emptyTag('elem', ['http://www.w3.org/XML/1998/namespace', 'space'] => 'preserve');
 	$w->end();
 
-	if (!unlike($bufStr, qr/1998/, "No declaration should be generated for the 'xml:' prefix"))
+	if (!unlike(getBufStr(), qr/1998/, "No declaration should be generated for the 'xml:' prefix"))
 	{
-		diag($bufStr);
+		diag(getBufStr());
 	}
 };
 
@@ -695,9 +706,9 @@ TEST: {
 	$w->endTag('doc');
 	$w->end();
 
-	if (!unlike($bufStr, qr/uri:test.*uri:test/, 'An API should allow forced namespace declarations'))
+	if (!unlike(getBufStr(), qr/uri:test.*uri:test/, 'An API should allow forced namespace declarations'))
 	{
-		diag($bufStr);
+		diag(getBufStr());
 	}
 };
 
@@ -1034,6 +1045,10 @@ TEST: {
 	checkResult(qq'<foo a="b"><![CDATA[hello]]></foo>\n',
 		'cdataElement should produce a valid element containing a CDATA section');
 };
+
+
+# Free test resources
+$outputFile->close() or die "Unable to close temporary file: $!";
 
 1;
 
