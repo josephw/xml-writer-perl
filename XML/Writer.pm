@@ -430,7 +430,7 @@ sub new {
     my $newOutput = $_[0];
 
     if (ref($newOutput) eq 'SCALAR') {
-      $newOutput = new XML::Writer::String($newOutput);
+      $newOutput = new XML::Writer::_String($newOutput);
     }
                                 # If there is no OUTPUT parameter,
                                 # use standard output
@@ -1064,7 +1064,7 @@ sub forceNSDecl
 }
 
 
-package XML::Writer::String;
+package XML::Writer::_String;
 
 # Internal class, behaving sufficiently like an IO::Handle,
 #  that stores written output in a string
