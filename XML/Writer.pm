@@ -734,7 +734,7 @@ sub new {
 
                                 # Is this an element name that matches
                                 # the default NS?
-    if (!$attFlag && ($uri eq $defaultPrefix)) {
+    if (!$attFlag && $defaultPrefix && ($uri eq $defaultPrefix)) {
       unless ($nsDefaultDecl) {
         push @{$atts}, 'xmlns';
         push @{$atts}, $uri;
