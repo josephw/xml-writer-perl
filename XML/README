@@ -26,5 +26,7 @@ copyright 2003 Ed Avis, <ed@membled.com> and others.
 Some fixes, and a rewritten test suite,
 copyright 2004 Joseph Walton <joe@kafsemo.org>
 
+Current development is hosted at <http://xml-writer-perl.berlios.de/>.
+
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
