@@ -1,6 +1,6 @@
 ########################################################################
 # test.pl - test script for XML::Writer module.
-# $Id: test.pl,v 0.2 1999/04/25 13:46:44 david Exp $
+# $Id: test.pl,v 1.2 2003/10/18 20:18:58 ed Exp $
 ########################################################################
 
 # Before `make install' is performed this script should be runnable with
@@ -13,7 +13,16 @@
 
 BEGIN { $| = 1; print "1..43\n"; }
 END {print "not ok 1\n" unless $loaded;}
-use XML::Writer;
+
+# When loading XML::Writer check there are no warnings.
+{
+    local $SIG{__WARN__} = sub {
+	undef $SIG{__WARN__};
+	warn $_[0];
+	print 'not ';
+    };
+    require XML::Writer;
+}
 $loaded = 1;
 print "ok 1\n";
 

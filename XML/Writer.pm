@@ -3,7 +3,7 @@
 # Copyright (c) 1999 by Megginson Technologies.
 # No warranty.  Commercial and non-commercial use freely permitted.
 #
-# $Id: Writer.pm,v 0.4 2000/04/05 02:23:34 david Exp $
+# $Id: Writer.pm,v 1.2 2003/10/18 20:18:58 ed Exp $
 ########################################################################
 
 package XML::Writer;
@@ -14,8 +14,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 use IO::Handle;
-
-$VERSION = "0.4";
+$VERSION = "0.4.1";
 
 
 
@@ -951,7 +950,7 @@ XML::Writer - Perl extension for writing XML documents.
 =head1 SYNOPSIS
 
   use XML::Writer;
-  use IO::File;
+  use IO;
 
   my $output = new IO::File(">output.xml");
 
