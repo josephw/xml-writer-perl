@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 132);
+use Test::More(tests => 137);
 
 
 # Catch warnings
@@ -845,6 +845,27 @@ TEST: {
 EOS
 };
 
+# Test DATA_MODE and initial spacing
+TEST: {
+	initEnv(
+		DATA_MODE => 1,
+		DATA_INDENT => 1
+	);
+
+	$w->xmlDecl();
+	$w->startTag('doc');
+	$w->emptyTag('item');
+	$w->endTag('doc');
+	$w->end();
+	checkResult(<<"EOS", "A nested element with DATA_MODE and a declaration");
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doc>
+ <item />
+</doc>
+EOS
+};
+
 # Writing without namespaces should allow colons
 TEST: {
 	initEnv(NAMESPACES => 0);
@@ -1046,6 +1067,36 @@ TEST: {
 		'cdataElement should produce a valid element containing a CDATA section');
 };
 
+# Verify that writing characters using CDATA outside of an element fails
+TEST: {
+	initEnv();
+	expectError('Attempt to insert characters outside of document element',
+		eval {
+			$w->cdata('Test');
+		});
+};
+
+# Expect to break on mixed content in data mode
+TEST: {
+	initEnv();
+	$w->setDataMode(1);
+	$w->startTag('x');
+	$w->cdata('Text');
+	expectError("Mixed content not allowed in data mode: element x", eval {
+		$w->startTag('x');
+	});
+};
+
+# Break with mixed content when the element is written before the characters
+TEST: {
+	initEnv();
+	$w->setDataMode(1);
+	$w->startTag('x');
+	$w->emptyTag('empty');
+	expectError("Mixed content not allowed in data mode: characters", eval {
+		$w->cdata('Text');
+	});
+};
 
 # Free test resources
 $outputFile->close() or die "Unable to close temporary file: $!";
