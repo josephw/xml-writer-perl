@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 122);
+use Test::More(tests => 123);
 
 
 # Catch warnings
@@ -489,6 +489,14 @@ TEST: {
 	checkResult("<__NS1:doc __NS1:id=\"x\" xmlns:__NS1=\"$ns\" />\n",
 		'Same as above, but removing the prefix before the document starts');
 };
+
+# Verify that removePrefix works when there is no default prefix
+TEST: {
+	my $ns = 'http://www.foo.com/';
+	initEnv(PREFIX_MAP => {$ns => 'pfx'});
+	$w->removePrefix($ns);
+	wasNoWarning('removePrefix should not warn when there is no default prefix');
+}
 
 # Verify that a removed namespace prefix behaves as if it were never added
 TEST: {

@@ -867,7 +867,7 @@ sub new {
   #
   $self->{REMOVEPREFIX} = sub {
     my ($uri) = (@_);
-    if ($defaultPrefix eq $uri) {
+    if ($defaultPrefix && ($defaultPrefix eq $uri)) {
       $defaultPrefix = undef;
     }
     delete $prefixMap{$uri};
