@@ -15,7 +15,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 use IO::Handle;
-$VERSION = "0.510";
+$VERSION = "0.520";
 
 
 
@@ -835,20 +835,7 @@ sub new {
       
                                 # Is there a straight-forward prefix?
     } elsif ($prefix) {
-      unless ($nsDecls->{$uri}) {
-                                # Copy on write (FIXME: duplicated)
-        unless ($nsCopyFlag) {
-          $uriMap = {%{$uriMap}};
-          $nsDecls = {%{$nsDecls}};
-          $nsCopyFlag = 1;
-        }
-        $nsDecls->{$uri} = $prefix;
-        $uriMap->{$prefix} = $uri;
-        push @{$atts}, "xmlns:$prefix";
-        push @{$atts}, $uri;
-      }
       $$nameref = "$prefix:$local";
-
     } else {
       $prefix = &{$genPrefix}($uri);
       unless ($nsCopyFlag) {
@@ -1525,7 +1512,15 @@ providing an UNSAFE parameter:
 
 =head1 AUTHOR
 
-David Megginson, david@megginson.com
+David Megginson E<lt>david@megginson.comE<gt>
+
+
+=head1 COPYRIGHT
+
+Copyright 1999, 2000 David Megginson E<lt>david@megginson.comE<gt>
+
+Copyright 2004 Joseph Walton E<lt>joe@kafsemo.orgE<gt>
+
 
 =head1 SEE ALSO
 
