@@ -927,7 +927,7 @@ sub new {
     my $OLD_pi = $self->{PI};
     $self->{PI} = sub {
       my $target = $_[0];
-      if ($target =~ /:/) {
+      if (index($target, ':') >= 0) {
         croak "PI target '$target' contains a colon.";
       }
       &{$OLD_pi};
@@ -996,12 +996,12 @@ sub _checkNSNames {
 
                                 # Check the element name.
   if (ref($name) eq 'ARRAY') {
-    if ($name->[1] =~ /:/) {
+    if (index($name->[1], ':') >= 0) {
       croak("Local part of element name '" .
             $name->[1] .
             "' contains a colon.");
     }
-  } elsif ($name =~ /:/) {
+  } elsif (index($name, ':') >= 0) {
     croak("Element name '$name' contains a colon.");
   }
 
@@ -1010,16 +1010,14 @@ sub _checkNSNames {
     my $name = $names->[$i];
     if (ref($name) eq 'ARRAY') {
       my $local = $name->[1];
-      if ($local =~ /:/) {
+      if (index($local, ':') >= 0) {
         croak "Local part of attribute name '$local' contains a colon.";
       }
     } else {
-      if ($name =~ /^(xmlns|.*:)/) {
-        if ($name =~ /^xmlns/) {
-          croak "Attribute name '$name' begins with 'xmlns'";
-        } elsif ($name =~ /:/) {
-          croak "Attribute name '$name' contains ':'";
-        }
+      if ($name =~ /^xmlns/) {
+        croak "Attribute name '$name' begins with 'xmlns'";
+      } elsif (index($name, ':') >= 0) {
+        croak "Attribute name '$name' contains ':'";
       }
     }
     $i += 2;
