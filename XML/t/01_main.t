@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 147);
+use Test::More(tests => 154);
 
 
 # Catch warnings
@@ -1267,6 +1267,44 @@ TEST: {
 	checkResult(<<"EOS", 'The default namespace declaration should be present and correct when the document element belongs to a different namespace');
 <__NS1:document xmlns:__NS1="uri:test2" xmlns="uri:test" />
 EOS
+};
+
+# Without namespaces, addPrefix and removePrefix should be safe NOPs
+TEST: {
+	initEnv(NAMESPACES => 0);
+
+	$w->addPrefix('these', 'arguments', 'are', 'ignored');
+	$w->removePrefix('as', 'are', 'these');
+
+	wasNoWarning('Prefix manipulation on a namespace-unaware instance should not warn');
+};
+
+# Make sure that getting and setting the output stream behaves as expected
+TEST: {
+	initEnv();
+
+	my $out = $w->getOutput();
+
+	isnt($out, undef, 'Output for this fixture must be defined');
+
+	$w->setOutput(\*STDERR);
+	is($w->getOutput(), \*STDERR, 'Changing output should be reflected in a subsequent get');
+
+	$w->setOutput($out);
+	is ($w->getOutput(), $out, 'Changing output back should succeed');
+
+	$w->emptyTag('x');
+	$w->end();
+	checkResult("<x />\n", 'After changing the output a document should still be generated');
+};
+
+# Make sure that undef implies STDOUT for setOutput
+TEST: {
+	initEnv();
+
+	$w->setOutput();
+
+	is($w->getOutput(), \*STDOUT, 'If no output is given, STDOUT should be used');
 };
 
 
