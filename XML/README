@@ -16,8 +16,8 @@ Here is an example:
 
 If necessary, error-checking can be turned off for production use.
 
-This release fixes various warnings, adds the FORCED_NS_DECLS
-argument and greatly improves test suite coverage thanks to Devel::Cover.
+This release bumps the version number so the changes in the 0.4.x releases
+can automatically be picked up by CPAN users.
 
 See the Changes file for detailed changes between versions.
 
