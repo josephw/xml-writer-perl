@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::Writer.
 
-0.4.5 Xxx Xxx XX XX:XX:XX GMT XXXX    <joe@kafsemo.org>
+0.4.5 Mon Mar  1 14:46:47 GMT 2004    <joe@kafsemo.org>
 	- added FORCED_NS_DECLS parameter, to declare namespaces ahead of use
 	- fixed check for duplicate attributes
 	- correctly take the default namespace from the supplied prefix map
