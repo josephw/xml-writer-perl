@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::Writer.
 
-0.4.5 Fri Feb 20 20:09:10 GMT 2004    <joe@kafsemo.org>
+0.4.5 Xxx Xxx XX XX:XX:XX GMT XXXX    <joe@kafsemo.org>
 	- added FORCED_NS_DECLS parameter, to declare namespaces ahead of use
 	- fixed check for duplicate attributes
 	- correctly take the default namespace from the supplied prefix map
@@ -8,6 +8,11 @@ Revision history for Perl extension XML::Writer.
 	- allow xml-stylesheet PIs
 	- fixed warnings about uninitialised values
 	- added a comprehensive suite of tests, using Test::More
+
+0.4.2 Sun Feb 22 15:33:44 GMT 2004    ed@membled.com
+        - added raw() to print raw, unescaped text
+        - patch from srinithan adding cdata() and cdataElement() to
+          write CDATA sections
 
 0.4.1 Sat Oct 18 19:51:51 BST 2003    ed@membled.com
         - fixed deprecation warning from 'use IO'
