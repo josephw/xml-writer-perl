@@ -764,7 +764,7 @@ TEST: {
 	ok($w->getDataMode(), 'Should be in data mode');
 	$w->startTag('doc');
 	$w->dataElement('data', 'This is data');
-	$w->dataElement('empty');
+	$w->dataElement('empty', '');
 	$w->emptyTag('empty');
 	$w->startTag('mixed');
 	$w->setDataMode(0);
