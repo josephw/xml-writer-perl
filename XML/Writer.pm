@@ -13,7 +13,7 @@ require 5.004;
 use strict;
 use vars qw($VERSION);
 use Carp;
-use IO;
+use IO::Handle;
 
 $VERSION = "0.4";
 
@@ -951,7 +951,7 @@ XML::Writer - Perl extension for writing XML documents.
 =head1 SYNOPSIS
 
   use XML::Writer;
-  use IO;
+  use IO::File;
 
   my $output = new IO::File(">output.xml");
 
