@@ -1,6 +1,6 @@
 ########################################################################
 # test.pl - test script for XML::Writer module.
-# $Id: test.pl,v 1.2 2003/10/18 20:18:58 ed Exp $
+# $Id: test.pl,v 1.4 2004/02/22 16:01:48 ed Exp $
 ########################################################################
 
 # Before `make install' is performed this script should be runnable with
@@ -11,7 +11,7 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..43\n"; }
+BEGIN { $| = 1; print "1..46\n"; }
 END {print "not ok 1\n" unless $loaded;}
 
 # When loading XML::Writer check there are no warnings.
@@ -550,23 +550,44 @@ TEST: {
   });
 };
 
-# Test 44: inserting cdata ( character data )
+
+# Test 44: Raw output.
 TEST: {
   $writer->startTag("foo");
-  $writer->cData("cdata testing - test44");
+  $writer->raw("<bar/>");
   $writer->endTag("foo");
   $writer->end();
-  checkResult(44, "<foo><![CDATA[cdata testing - test44]]></foo>\n");
+  checkResult(44, "<foo><bar/></foo>\n");
 };
 
-# Test 45: inserting cdata containing cdata delimeters ']]>'
+
+# Test 45: inserting a CDATA section.
 TEST: {
   $writer->startTag("foo");
-  $writer->cData("This is a CDATA section <![CDATA[text]]>");
+  $writer->cdata("cdata testing - test45");
   $writer->endTag("foo");
   $writer->end();
-  checkResult(45, "<foo><![CDATA[This is a CDATA section <![CDATA[text]]]]><![CDATA[>]]></foo>\n");
+  checkResult(45, "<foo><![CDATA[cdata testing - test45]]></foo>\n");
 };
+
+
+# Test 46: inserting CDATA containing CDATA delimeters ']]>'.
+TEST: {
+  $writer->startTag("foo");
+  $writer->cdata("This is a CDATA section <![CDATA[text]]>");
+  $writer->endTag("foo");
+  $writer->end();
+  checkResult(46, "<foo><![CDATA[This is a CDATA section <![CDATA[text]]]]><![CDATA[>]]></foo>\n");
+};
+
+
+# Test 47: cdataElement().
+TEST: {
+  $writer->cdataElement("foo", "hello", a => 'b');
+  $writer->end();
+  checkResult(47, qq'<foo a="b"><![CDATA[hello]]></foo>\n');
+};
+
 1;
 
 __END__

@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::Writer.
 
+0.4.2 Sun Feb 22 15:33:44 GMT 2004    ed@membled.com
+        - added raw() to print raw, unescaped text
+        - patch from srinithan adding cdata() and cdataElement() to
+          write CDATA sections
+
 0.4.1 Sat Oct 18 19:51:51 BST 2003    ed@membled.com
         - fixed deprecation warning from 'use IO'
 

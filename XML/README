@@ -16,11 +16,12 @@ Here is an example:
 
 If necessary, error-checking can be turned off for production use.
 
-This release 0.4.1 fixes a warning about 'use IO' being deprecated.
-See the Changes file for detailed changes between versions.
+This release 0.4.2 adds the raw() method to write unescaped text
+(sometimes useful), and the cdata() and cdataElement() methods to
+write character data in a CDATA section (thanks srinithan).
 
-Copyright (c) 1999 by David Megginson
-Small changes by Ed Avis, <ed@membled.com>
+Copyright (c) 1999 by David Megginson,
+copyright 2003 Ed Avis, <ed@membled.com> and others.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
