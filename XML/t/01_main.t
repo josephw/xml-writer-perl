@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 160);
+use Test::More(tests => 162);
 
 
 # Catch warnings
@@ -1363,6 +1363,18 @@ TEST: {
 <b>\x{E2}\x{82}\x{AC}</b>
 </a>
 EOR
+};
+
+# Capture generated XML in a scalar
+TEST: {
+	my $s;
+
+	$w = new XML::Writer(OUTPUT => \$s);
+	$w->emptyTag('x');
+	$w->end();
+
+	wasNoWarning('Capturing in a scalar should not cause warnings');
+	is($s, "<x />\n", "Output should be stored in a scalar, if one is passed");
 };
 
 

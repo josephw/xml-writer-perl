@@ -15,6 +15,7 @@ installdirs:  site
 no_index:
   package:
     - XML::Writer::Namespaces
+    - XML::Writer::String
 
 dynamic_config: 0
 generated_by: Hand

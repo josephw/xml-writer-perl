@@ -428,6 +428,10 @@ sub new {
 
   $self->{'SETOUTPUT'} = sub {
     my $newOutput = $_[0];
+
+    if (ref($newOutput) eq 'SCALAR') {
+      $newOutput = new XML::Writer::String($newOutput);
+    }
                                 # If there is no OUTPUT parameter,
                                 # use standard output
     $output = $newOutput || \*STDOUT;
@@ -1060,6 +1064,26 @@ sub forceNSDecl
 }
 
 
+package XML::Writer::String;
+
+# Internal class, behaving sufficiently like an IO::Handle,
+#  that stores written output in a string
+#
+# Heavily inspired by Simon Oliver's XML::Writer::String
+
+sub new
+{
+  my $class = shift;
+  my $scalar_ref = shift;
+  return bless($scalar_ref, $class);
+}
+
+sub print
+{
+  ${(shift)} .= join('', @_);
+  return 1;
+}
+
 1;
 __END__
 
@@ -1128,8 +1152,9 @@ Arguments are an anonymous hash array of parameters:
 =item OUTPUT
 
 An object blessed into IO::Handle or one of its subclasses (such as
-IO::File); if this parameter is not present, the module will write to
-standard output.
+IO::File), or a reference to a string; if this parameter is not present,
+the module will write to standard output. If a string reference is passed,
+it will capture the generated XML.
 
 =item NAMESPACES
 
