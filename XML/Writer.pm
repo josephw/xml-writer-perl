@@ -67,6 +67,7 @@ sub new {
   my @hasDataStack = ();
   my $hasElement = 0;
   my @hasElementStack = ();
+  my $hasHeading = 0; # Does this document have anything before the first element?
 
   #
   # Private method to show attributes.
@@ -119,6 +120,7 @@ sub new {
       $output->print(" standalone=\"$standalone\"");
     }
     $output->print("?>\n");
+    $hasHeading = 1;
   };
 
   my $SAFE_xmlDecl = sub {
@@ -140,6 +142,7 @@ sub new {
     }
     if ($elementLevel == 0) {
       $output->print("\n");
+      $hasHeading = 1;
     }
   };
 
@@ -164,6 +167,7 @@ sub new {
     $output->print("<!-- $data -->");
     if ($elementLevel == 0) {
       $output->print("\n");
+      $hasHeading = 1;
     }
   };
 
@@ -193,6 +197,7 @@ sub new {
       $output->print(" SYSTEM \"$systemId\"");
     }
     $output->print(">\n");
+    $hasHeading = 1;
   };
 
   my $SAFE_doctype = sub {
@@ -210,7 +215,7 @@ sub new {
 
   my $startTag = sub {
     my $name = $_[0];
-    if ($dataMode) {
+    if ($dataMode && ($hasHeading || $elementLevel)) {
       $output->print("\n");
       $output->print(" " x ($elementLevel * $dataIndent));
     }
@@ -250,7 +255,7 @@ sub new {
 
   my $emptyTag = sub {
     my $name = $_[0];
-    if ($dataMode) {
+    if ($dataMode && ($hasHeading || $elementLevel)) {
       $output->print("\n");
       $output->print(" " x ($elementLevel * $dataIndent));
     }
