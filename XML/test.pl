@@ -1,434 +1,533 @@
+#!/usr/bin/perl -w
 ########################################################################
 # test.pl - test script for XML::Writer module.
-# $Id: test.pl,v 1.2 2003/10/18 20:18:58 ed Exp $
+# Copyright (c) 1999 by Megginson Technologies.
+# Copyright (c) 2004 by Joseph Walton <joe@kafsemo.org>.
+# No warranty.  Commercial and non-commercial use freely permitted.
+#
+# $Id$
 ########################################################################
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
-######################### We start with some black magic to print on failure.
-
-# Change 1..1 below to 1..last_test_to_print .
-# (It may become useful if the test is moved to ./t subdirectory.)
-
-BEGIN { $| = 1; print "1..43\n"; }
-END {print "not ok 1\n" unless $loaded;}
-
-# When loading XML::Writer check there are no warnings.
-{
-    local $SIG{__WARN__} = sub {
-	undef $SIG{__WARN__};
-	warn $_[0];
-	print 'not ';
-    };
-    require XML::Writer;
-}
-$loaded = 1;
-print "ok 1\n";
-
-######################### End of black magic.
-
-# Insert your test code below (better if it prints "ok 13"
-# (correspondingly "not ok 13") depending on the success of chunk 13
-# of the test code):
-
-use IO::File;
 use strict;
 
-my $output = IO::File->new_tmpfile
-  || die "Cannot write to temporary file";
-my $writer = new XML::Writer::Namespaces(OUTPUT => $output)
-  || die "Cannot create XML writer";
+use Test::More(tests => 122);
 
-#
-# Reset the environment for an additional test.
-#
-sub resetEnv {
-  $output->close();
-  $output = IO::File->new_tmpfile;
-  $writer = new XML::Writer::Namespaces(OUTPUT => $output);
+
+# Catch warnings
+my $warning;
+
+$SIG{__WARN__} = sub {
+	($warning) = @_ unless ($warning);
+};
+
+sub wasNoWarning($)
+{
+	my ($reason) = @_;
+
+	if (!ok(!$warning, $reason)) {
+		diag($warning);
+	}
+}
+
+require XML::Writer;
+
+wasNoWarning('Loading XML::Writer should not result in warnings');
+
+use IO::String;
+
+# The XML::Writer that will be used
+my $w;
+
+my $bufStr;
+
+# Set up the environment to run a test.
+sub initEnv(@)
+{
+	my (%args) = @_;
+	$bufStr = '';
+
+	# Overwrite OUTPUT so it goes to the buffer string
+	$args{'OUTPUT'} = new IO::String($bufStr);
+
+	# Set NAMESPACES, unless it's present
+	$args{'NAMESPACES'} = 1 unless(defined($args{'NAMESPACES'}));
+
+	undef($warning);
+	$w = new XML::Writer(%args) || die "Cannot create XML writer";
 }
 
 #
 # Check the results in the temporary output file.
 #
-# $number - the test number
 # $expected - the exact output expected
 #
-sub checkResult {
-  my ($number, $expected) = (@_);
-  my $data = '';
-  $output->seek(0,0);
-  $output->read($data, 1024);
-  if ($expected eq $data) {
-    print "ok $number\n";
-  } else {
-    print "not ok $number\n";
-    print STDERR "\t(Expected '$expected' but found '$data')\n";
-  }
-  resetEnv();
+sub checkResult($$)
+{
+	my ($expected, $explanation) = (@_);
+
+	is($bufStr, $expected, $explanation);
+	wasNoWarning('Expected result tests should not cause warnings');
 }
 
 #
 # Expect an error of some sort, and check that the message matches.
 #
-# $number - the test number
 # $pattern - a regular expression that must match the error message
 # $value - the return value from an eval{} block
 #
-sub expectError {
-  my ($number, $pattern, $value) = (@_);
-  if (defined($value)) {
-    print STDERR "Expected error did not occur!\n";
-    print "not ok $number\n";
-  } elsif ($@ !~ $pattern) {
-    print STDERR $@;
-    print "not ok $number\n";
-  } else {
-    print "ok $number\n";
-  }
-  resetEnv();
+sub expectError($$) {
+	my ($pattern, $value) = (@_);
+	if (!ok((!defined($value) and ($@ =~ $pattern)), "Error expected: $pattern"))
+	{
+		diag('Actual error:');
+		if ($@) {
+			diag($@);
+		} else {
+			diag('(no error)');
+			diag($bufStr);
+		}
+	}
 }
 
-
-
-# Test 2: Empty element tag.
+# Empty element tag.
 TEST: {
-  $writer->emptyTag("foo");
-  $writer->end();
-  checkResult(2, "<foo />\n");
+	initEnv();
+	$w->emptyTag("foo");
+	$w->end();
+	checkResult("<foo />\n", 'An empty element tag');
 };
 
-
-
-# Test 3: Empty element tag with XML decl.
+# Empty element tag with XML decl.
 TEST: {
-  $writer->xmlDecl();
-  $writer->emptyTag("foo");
-  $writer->end();
-  checkResult(3, <<"EOS");
+	initEnv();
+	$w->xmlDecl();
+	$w->emptyTag("foo");
+	$w->end();
+	checkResult(<<"EOS", 'Empty element tag with XML declaration');
 <?xml version="1.0" encoding="UTF-8"?>
 <foo />
 EOS
 };
 
-
-
-# Test 4: Start/end tag.
+# A document with a public and system identifier set
 TEST: {
-  $writer->startTag("foo");
-  $writer->endTag("foo");
-  $writer->end();
-  checkResult(4, "<foo></foo>\n");
+	initEnv();
+	$w->doctype('html', "-//W3C//DTD XHTML 1.1//EN",
+						"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
+	$w->emptyTag('html');
+	$w->end();
+	checkResult(<<"EOS", 'A document with a public and system identifier');
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html />
+EOS
 };
 
-
-
-# Test 5: Attributes
+# A document with a public and system identifier set, using startTag
 TEST: {
-  $writer->emptyTag("foo", "x" => "1>2");
-  $writer->end();
-  checkResult(5, "<foo x=\"1&gt;2\" />\n");
+	initEnv();
+	$w->doctype('html', "-//W3C//DTD XHTML 1.1//EN",
+						"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
+	$w->startTag('html');
+	$w->endTag('html');
+	$w->end();
+	checkResult(<<"EOS", 'A document with a public and system identifier');
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html></html>
+EOS
 };
 
-
-
-# Test 6: Character data
+# A document with a only a public identifier
 TEST: {
-  $writer->startTag("foo");
-  $writer->characters("<tag>&amp;</tag>");
-  $writer->endTag("foo");
-  $writer->end();
-  checkResult(6, "<foo>&lt;tag&gt;&amp;amp;&lt;/tag&gt;</foo>\n");
+	initEnv();
+	expectError("A DOCTYPE declaration with a public ID must also have a system ID", eval {
+		$w->doctype('html', "-//W3C//DTD XHTML 1.1//EN");
+	});
 };
 
-
-
-# Test 7: Comment outside document element
+# A document with only a system identifier set
 TEST: {
-  $writer->comment("comment");
-  $writer->emptyTag("foo");
-  $writer->end();
-  checkResult(7, "<!-- comment -->\n<foo />\n");
+	initEnv();
+	$w->doctype('html', undef, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
+	$w->emptyTag('html');
+	$w->end();
+	checkResult(<<"EOS", 'A document with just a system identifier');
+<!DOCTYPE html SYSTEM "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html />
+EOS
 };
 
-
-
-# Test 8: Processing instruction without data (outside document element)
+# Empty element tag with standalone set
 TEST: {
-  $writer->pi("pi");
-  $writer->emptyTag("foo");
-  $writer->end();
-  checkResult(8, "<?pi?>\n<foo />\n");
+	initEnv();
+	$w->xmlDecl(undef, 'yes');
+	$w->emptyTag("foo");
+	$w->end();
+	checkResult(<<"EOS", 'A document with "standalone" declared');
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<foo />
+EOS
 };
 
-
-# Test 9: Processing instruction with data (outside document element)
+# Empty element tag with standalone explicitly set to 'no'
 TEST: {
-  $writer->pi("pi", "data");
-  $writer->emptyTag("foo");
-  $writer->end();
-  checkResult(9, "<?pi data?>\n<foo />\n");
+	initEnv();
+	$w->xmlDecl(undef, 'no');
+	$w->emptyTag("foo");
+	$w->end();
+	checkResult(<<"EOS", "A document with 'standalone' declared as 'no'");
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<foo />
+EOS
 };
 
-
-# Test 10: comment inside document element
+# xmlDecl with encoding set
 TEST: {
-  $writer->startTag("foo");
-  $writer->comment("comment");
-  $writer->endTag("foo");
-  $writer->end();
-  checkResult(10, "<foo><!-- comment --></foo>\n");
+	initEnv();
+	$w->xmlDecl('ISO-8859-1');
+	$w->emptyTag("foo");
+	$w->end();
+	checkResult(<<"EOS", 'A document with a declared encoding');
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<foo />
+EOS
 };
 
-
-# Test 11: processing instruction inside document element
+# Start/end tag.
 TEST: {
-  $writer->startTag("foo");
-  $writer->pi("pi");
-  $writer->endTag("foo");
-  $writer->end();
-  checkResult(11, "<foo><?pi?></foo>\n");
+	initEnv();
+	$w->startTag("foo");
+	$w->endTag("foo");
+	$w->end();
+	checkResult("<foo></foo>\n", 'A separate start and end tag');
 };
 
-
-# Test 12: WFE for mismatched tags
+# Attributes
 TEST: {
-  $writer->startTag("foo");
-  expectError(12, "Attempt to end element \"foo\" with \"bar\" tag", eval {
-    $writer->endTag("bar");
-  });
+	initEnv();
+	$w->emptyTag("foo", "x" => "1>2");
+	$w->end();
+	checkResult("<foo x=\"1&gt;2\" />\n", 'Simple attributes');
 };
 
-
-# Test 13: WFE for unclosed elements
+# Character data
 TEST: {
-  $writer->startTag("foo");
-  $writer->startTag("foo");
-  $writer->endTag("foo");
-  expectError(13, "Document ended with unmatched start tag\\(s\\)", eval {
-    $writer->end();
-  });
+	initEnv();
+	$w->startTag("foo");
+	$w->characters("<tag>&amp;</tag>");
+	$w->endTag("foo");
+	$w->end();
+	checkResult("<foo>&lt;tag&gt;&amp;amp;&lt;/tag&gt;</foo>\n", 'Escaped character data');
 };
 
-
-# Test 14: WFE for no document element
+# Comment outside document element
 TEST: {
-  $writer->xmlDecl();
-  expectError(14, "Document cannot end without a document element", eval {
-    $writer->end();
-  });
+	initEnv();
+	$w->comment("comment");
+	$w->emptyTag("foo");
+	$w->end();
+	checkResult("<!-- comment -->\n<foo />\n", 'A comment outside the document element');
 };
 
-
-# Test 15: WFE for multiple document elements (non-empty)
+# Processing instruction without data (outside document element)
 TEST: {
-  $writer->startTag('foo');
-  $writer->endTag('foo');
-  expectError(15, "Attempt to insert start tag after close of", eval {
-    $writer->startTag('foo');
-  });
+	initEnv();
+	$w->pi("pi");
+	$w->emptyTag("foo");
+	$w->end();
+	checkResult("<?pi?>\n<foo />\n", 'A data-less processing instruction');
 };
 
-
-# Test 16: WFE for multiple document elements (empty)
+# Processing instruction with data (outside document element)
 TEST: {
-  $writer->emptyTag('foo');
-  expectError(16, "Attempt to insert empty tag after close of", eval {
-    $writer->emptyTag('foo');
-  });
+	initEnv();
+	$w->pi("pi", "data");
+	$w->emptyTag("foo");
+	$w->end();
+	checkResult("<?pi data?>\n<foo />\n", 'A processing instruction with data');
 };
 
-
-# Test 17: DOCTYPE mismatch with empty tag
+# Comment inside document element
 TEST: {
-  $writer->doctype('foo');
-  expectError(17, "Document element is \"bar\", but DOCTYPE is \"foo\"", eval {
-    $writer->emptyTag('bar');
-  });
+	initEnv();
+	$w->startTag("foo");
+	$w->comment("comment");
+	$w->endTag("foo");
+	$w->end();
+	checkResult("<foo><!-- comment --></foo>\n", 'A comment inside an element');
 };
 
-
-# Test 18: DOCTYPE mismatch with start tag
+# Processing instruction inside document element
 TEST: {
-  $writer->doctype('foo');
-  expectError(18, "Document element is \"bar\", but DOCTYPE is \"foo\"", eval {
-    $writer->startTag('bar');
-  });
+	initEnv();
+	$w->startTag("foo");
+	$w->pi("pi");
+	$w->endTag("foo");
+	$w->end();
+	checkResult("<foo><?pi?></foo>\n", 'A processing instruction inside an element');
 };
 
-
-# Test 19: Multiple DOCTYPE declarations
+# WFE for mismatched tags
 TEST: {
-  $writer->doctype('foo');
-  expectError(19, "Attempt to insert second DOCTYPE", eval {
-    $writer->doctype('bar');
-  });
+	initEnv();
+	$w->startTag("foo");
+	expectError("Attempt to end element \"foo\" with \"bar\" tag", eval {
+		$w->endTag("bar");
+	});
 };
 
-
-# Test 20: Misplaced DOCTYPE declaration
+# WFE for unclosed elements
 TEST: {
-  $writer->startTag('foo');
-  expectError(20, "The DOCTYPE declaration must come before", eval {
-    $writer->doctype('foo');
-  });
+	initEnv();
+	$w->startTag("foo");
+	$w->startTag("foo");
+	$w->endTag("foo");
+	expectError("Document ended with unmatched start tag\\(s\\)", eval {
+		$w->end();
+	});
 };
 
-
-# Test 21: Multiple XML declarations
+# WFE for no document element
 TEST: {
-  $writer->xmlDecl();
-  expectError(21, "The XML declaration is not the first thing", eval {
-    $writer->xmlDecl();
-  });
+	initEnv();
+	$w->xmlDecl();
+	expectError("Document cannot end without a document element", eval {
+		$w->end();
+	});
 };
 
-
-# Test 22: Misplaced XML declaration
+# WFE for multiple document elements (non-empty)
 TEST: {
-  $writer->comment();
-  expectError(22, "The XML declaration is not the first thing", eval {
-    $writer->xmlDecl();
-  });
+	initEnv();
+	$w->startTag('foo');
+	$w->endTag('foo');
+	expectError("Attempt to insert start tag after close of", eval {
+		$w->startTag('foo');
+	});
 };
 
-
-# Test 23: Implied end-tag name.
+# WFE for multiple document elements (empty)
 TEST: {
-  $writer->startTag('foo');
-  $writer->endTag();
-  $writer->end();
-  checkResult(23, "<foo></foo>\n");
+	initEnv();
+	$w->emptyTag('foo');
+	expectError("Attempt to insert empty tag after close of", eval {
+		$w->emptyTag('foo');
+	});
 };
 
-
-# Test 24: in_element query
+# DOCTYPE mismatch with empty tag
 TEST: {
-  $writer->startTag('foo');
-  $writer->startTag('bar');
-  if ($writer->in_element('bar')) {
-    print "ok 24\n";
-  } else {
-    print "not ok 24\n";
-  }
-  resetEnv();
+	initEnv();
+	$w->doctype('foo');
+	expectError("Document element is \"bar\", but DOCTYPE is \"foo\"", eval {
+		$w->emptyTag('bar');
+	});
 };
 
-
-# Test 25: within_element query
+# DOCTYPE mismatch with start tag
 TEST: {
-  $writer->startTag('foo');
-  $writer->startTag('bar');
-  if ($writer->within_element('foo') && $writer->within_element('bar')) {
-    print "ok 25\n";
-  } else {
-    print "not ok 25\n";
-  }
-  resetEnv();
+	initEnv();
+	$w->doctype('foo');
+	expectError("Document element is \"bar\", but DOCTYPE is \"foo\"", eval {
+		$w->startTag('bar');
+	});
 };
 
-
-# Test 26: current_element query
+# DOCTYPE declarations
 TEST: {
-  $writer->startTag('foo');
-  $writer->startTag('bar');
-  if ($writer->current_element() eq 'bar') {
-    print "ok 26\n";
-  } else {
-    print "not ok 26\n";
-  }
-  resetEnv();
+	initEnv();
+	$w->doctype('foo');
+	expectError("Attempt to insert second DOCTYPE", eval {
+		$w->doctype('bar');
+	});
 };
 
-
-# Test 27: ancestor query
+# Misplaced DOCTYPE declaration
 TEST: {
-  $writer->startTag('foo');
-  $writer->startTag('bar');
-  if ($writer->ancestor(0) eq 'bar' && $writer->ancestor(1) eq 'foo') {
-    print "ok 27\n";
-  } else {
-    print "not ok 27\n";
-  }
-  resetEnv();
+	initEnv();
+	$w->startTag('foo');
+	expectError("The DOCTYPE declaration must come before", eval {
+		$w->doctype('foo');
+	});
 };
 
-
-# Test 28: basic namespace processing with empty element
+# Multiple XML declarations
 TEST: {
-  my $ns = 'http://www.foo.com/';
-  $writer->addPrefix($ns, 'foo');
-  $writer->emptyTag([$ns, 'doc']);
-  $writer->end();
-  checkResult(28, "<foo:doc xmlns:foo=\"$ns\" />\n");
+	initEnv();
+	$w->xmlDecl();
+	expectError("The XML declaration is not the first thing", eval {
+		$w->xmlDecl();
+	});
 };
 
-
-# Test 29: basic namespace processing with start/end tags
+# Misplaced XML declaration
 TEST: {
-  my $ns = 'http://www.foo.com/';
-  $writer->addPrefix($ns, 'foo');
-  $writer->startTag([$ns, 'doc']);
-  $writer->endTag([$ns, 'doc']);
-  $writer->end();
-  checkResult(29, "<foo:doc xmlns:foo=\"$ns\"></foo:doc>\n");
+	initEnv();
+	$w->comment();
+	expectError("The XML declaration is not the first thing", eval {
+		$w->xmlDecl();
+	});
 };
 
-
-# Test 30: basic namespace processing with generated prefix
+# Implied end-tag name.
 TEST: {
-  my $ns = 'http://www.foo.com/';
-  $writer->startTag([$ns, 'doc']);
-  $writer->endTag([$ns, 'doc']);
-  $writer->end();
-  checkResult(30, "<__NS1:doc xmlns:__NS1=\"$ns\"></__NS1:doc>\n");
+	initEnv();
+	$w->startTag('foo');
+	$w->endTag();
+	$w->end();
+	checkResult("<foo></foo>\n", 'A tag ended using an implied tag name');
 };
 
-
-# Test 31: basic namespace processing with attributes and empty tag.
+# in_element query
 TEST: {
-  my $ns = 'http://www.foo.com/';
-  $writer->addPrefix($ns, 'foo');
-  $writer->emptyTag([$ns, 'doc'], [$ns, 'id'] => 'x');
-  $writer->end();
-  checkResult(31, "<foo:doc foo:id=\"x\" xmlns:foo=\"$ns\" />\n");
+	initEnv();
+	$w->startTag('foo');
+	$w->startTag('bar');
+	ok($w->in_element('bar'), 'in_element should identify the current element');
 };
 
-
-# Test 32: same as above, but with default namespace.
+# within_element query
 TEST: {
-  my $ns = 'http://www.foo.com/';
-  $writer->addPrefix($ns, '');
-  $writer->emptyTag([$ns, 'doc'], [$ns, 'id'] => 'x');
-  $writer->end();
-  checkResult(32, "<doc __NS1:id=\"x\" xmlns=\"$ns\" xmlns:__NS1=\"$ns\" />\n");
+	initEnv();
+	$w->startTag('foo');
+	$w->startTag('bar');
+	ok($w->within_element('foo') && $w->within_element('bar'),
+		'within_element should know about all elements above us');
 };
 
-
-# Test 33: test that autogenerated prefixes avoid collision.
+# current_element query
 TEST: {
-  my $ns = 'http://www.foo.com/';
-  $writer->addPrefix('http://www.bar.com/', '__NS1');
-  $writer->emptyTag([$ns, 'doc']);
-  $writer->end();
-  checkResult(33, "<__NS2:doc xmlns:__NS2=\"$ns\" />\n");
+	initEnv();
+	$w->startTag('foo');
+	$w->startTag('bar');
+	is($w->current_element(), 'bar', 'current_element should identify the element we are in');
 };
 
-
-# Test 34: check for proper declaration nesting with subtrees.
+# ancestor query
 TEST: {
-  my $ns = 'http://www.foo.com/';
-  $writer->addPrefix($ns, 'foo');
-  $writer->startTag('doc');
-  $writer->characters("\n");
-  $writer->emptyTag([$ns, 'ptr1']);
-  $writer->characters("\n");
-  $writer->emptyTag([$ns, 'ptr2']);
-  $writer->characters("\n");
-  $writer->endTag('doc');
-  $writer->end();
-  checkResult(34, <<"EOS");
+	initEnv();
+	$w->startTag('foo');
+	$w->startTag('bar');
+	ok($w->ancestor(0) eq 'bar' && $w->ancestor(1) eq 'foo',
+		'ancestor() should match the startTag calls that have been made');
+};
+
+# Basic namespace processing with empty element
+TEST: {
+	initEnv();
+	my $ns = 'http://www.foo.com/';
+	$w->addPrefix($ns, 'foo');
+	$w->emptyTag([$ns, 'doc']);
+	$w->end();
+	checkResult("<foo:doc xmlns:foo=\"$ns\" />\n", 'Basic namespace processing');
+};
+
+# Basic namespace processing with start/end tags
+TEST: {
+	initEnv();
+	my $ns = 'http://www.foo.com/';
+	$w->addPrefix($ns, 'foo');
+	$w->startTag([$ns, 'doc']);
+	$w->endTag([$ns, 'doc']);
+	$w->end();
+	checkResult("<foo:doc xmlns:foo=\"$ns\"></foo:doc>\n", 'Basic namespace processing');
+};
+
+# Basic namespace processing with generated prefix
+TEST: {
+	initEnv();
+	my $ns = 'http://www.foo.com/';
+	$w->startTag([$ns, 'doc']);
+	$w->endTag([$ns, 'doc']);
+	$w->end();
+	checkResult("<__NS1:doc xmlns:__NS1=\"$ns\"></__NS1:doc>\n",
+		'Basic namespace processing with a generated prefix');
+};
+
+# Basic namespace processing with attributes and empty tag.
+TEST: {
+	initEnv();
+	my $ns = 'http://www.foo.com/';
+	$w->addPrefix($ns, 'foo');
+	$w->emptyTag([$ns, 'doc'], [$ns, 'id'] => 'x');
+	$w->end();
+	checkResult("<foo:doc foo:id=\"x\" xmlns:foo=\"$ns\" />\n",
+		'A namespaced element with a namespaced attribute');
+};
+
+# Same as above, but with default namespace.
+TEST: {
+	initEnv();
+	my $ns = 'http://www.foo.com/';
+	$w->addPrefix($ns, '');
+	$w->emptyTag([$ns, 'doc'], [$ns, 'id'] => 'x');
+	$w->end();
+	checkResult("<doc __NS1:id=\"x\" xmlns=\"$ns\" xmlns:__NS1=\"$ns\" />\n",
+		'Same as above, but with a default namespace');
+};
+
+# Same as above, but passing namespace prefixes through constructor
+TEST: {
+	my $ns = 'http://www.foo.com/';
+	initEnv(PREFIX_MAP => {$ns => ''});
+	$w->emptyTag([$ns, 'doc'], [$ns, 'id'] => 'x');
+	$w->end();
+	checkResult("<doc __NS1:id=\"x\" xmlns=\"$ns\" xmlns:__NS1=\"$ns\" />\n",
+		'Same as above, but passing the prefixes through the constructor');
+};
+
+# Same as above, but passing namespace prefixes through constructor and
+# then removing them programatically
+TEST: {
+	my $ns = 'http://www.foo.com/';
+	initEnv(PREFIX_MAP => {$ns => ''});
+	$w->removePrefix($ns);
+	$w->emptyTag([$ns, 'doc'], [$ns, 'id'] => 'x');
+	$w->end();
+	checkResult("<__NS1:doc __NS1:id=\"x\" xmlns:__NS1=\"$ns\" />\n",
+		'Same as above, but removing the prefix before the document starts');
+};
+
+# Verify that a removed namespace prefix behaves as if it were never added
+TEST: {
+	my $ns = 'http://www.foo.com/';
+	initEnv(PREFIX_MAP => {$ns => 'pfx', 'http://www.example.com/' => ''});
+	$w->removePrefix($ns);
+	$w->startTag([$ns, 'x']);
+	$w->emptyTag([$ns, 'y']);
+	$w->endTag([$ns, 'x']);
+	$w->end();
+	checkResult("<__NS1:x xmlns:__NS1=\"$ns\"><__NS1:y /></__NS1:x>\n",
+		'Same as above, but with a non-default namespace');
+};
+
+# Test that autogenerated prefixes avoid collision.
+TEST: {
+	initEnv();
+	my $ns = 'http://www.foo.com/';
+	$w->addPrefix('http://www.bar.com/', '__NS1');
+	$w->emptyTag([$ns, 'doc']);
+	$w->end();
+	checkResult("<__NS2:doc xmlns:__NS2=\"$ns\" />\n",
+		"Make sure that an autogenerated prefix doesn't clash");
+};
+
+# Check for proper declaration nesting with subtrees.
+TEST: {
+	initEnv();
+	my $ns = 'http://www.foo.com/';
+	$w->addPrefix($ns, 'foo');
+	$w->startTag('doc');
+	$w->characters("\n");
+	$w->emptyTag([$ns, 'ptr1']);
+	$w->characters("\n");
+	$w->emptyTag([$ns, 'ptr2']);
+	$w->characters("\n");
+	$w->endTag('doc');
+	$w->end();
+	checkResult(<<"EOS", 'Check for proper declaration nesting with subtrees.');
 <doc>
 <foo:ptr1 xmlns:foo="$ns" />
 <foo:ptr2 xmlns:foo="$ns" />
@@ -436,20 +535,20 @@ TEST: {
 EOS
 };
 
-
-# Test 35: check for proper declaration nesting with top level.
+# Check for proper declaration nesting with top level.
 TEST: {
-  my $ns = 'http://www.foo.com/';
-  $writer->addPrefix($ns, 'foo');
-  $writer->startTag([$ns, 'doc']);
-  $writer->characters("\n");
-  $writer->emptyTag([$ns, 'ptr1']);
-  $writer->characters("\n");
-  $writer->emptyTag([$ns, 'ptr2']);
-  $writer->characters("\n");
-  $writer->endTag([$ns, 'doc']);
-  $writer->end();
-  checkResult(35, <<"EOS");
+	initEnv();
+	my $ns = 'http://www.foo.com/';
+	$w->addPrefix($ns, 'foo');
+	$w->startTag([$ns, 'doc']);
+	$w->characters("\n");
+	$w->emptyTag([$ns, 'ptr1']);
+	$w->characters("\n");
+	$w->emptyTag([$ns, 'ptr2']);
+	$w->characters("\n");
+	$w->endTag([$ns, 'doc']);
+	$w->end();
+	checkResult(<<"EOS", 'Check for proper declaration nesting with top level.');
 <foo:doc xmlns:foo="$ns">
 <foo:ptr1 />
 <foo:ptr2 />
@@ -457,20 +556,20 @@ TEST: {
 EOS
 };
 
-
-# Test 36: check for proper default declaration nesting with subtrees.
+# Check for proper default declaration nesting with subtrees.
 TEST: {
-  my $ns = 'http://www.foo.com/';
-  $writer->addPrefix($ns, '');
-  $writer->startTag('doc');
-  $writer->characters("\n");
-  $writer->emptyTag([$ns, 'ptr1']);
-  $writer->characters("\n");
-  $writer->emptyTag([$ns, 'ptr2']);
-  $writer->characters("\n");
-  $writer->endTag('doc');
-  $writer->end();
-  checkResult(36, <<"EOS");
+	initEnv();
+	my $ns = 'http://www.foo.com/';
+	$w->addPrefix($ns, '');
+	$w->startTag('doc');
+	$w->characters("\n");
+	$w->emptyTag([$ns, 'ptr1']);
+	$w->characters("\n");
+	$w->emptyTag([$ns, 'ptr2']);
+	$w->characters("\n");
+	$w->endTag('doc');
+	$w->end();
+	checkResult(<<"EOS", 'Check for proper default declaration nesting with subtrees.');
 <doc>
 <ptr1 xmlns="$ns" />
 <ptr2 xmlns="$ns" />
@@ -478,20 +577,20 @@ TEST: {
 EOS
 };
 
-
-# Test 37: check for proper default declaration nesting with top level.
+# Check for proper default declaration nesting with top level.
 TEST: {
-  my $ns = 'http://www.foo.com/';
-  $writer->addPrefix($ns, '');
-  $writer->startTag([$ns, 'doc']);
-  $writer->characters("\n");
-  $writer->emptyTag([$ns, 'ptr1']);
-  $writer->characters("\n");
-  $writer->emptyTag([$ns, 'ptr2']);
-  $writer->characters("\n");
-  $writer->endTag([$ns, 'doc']);
-  $writer->end();
-  checkResult(37, <<"EOS");
+	initEnv();
+	my $ns = 'http://www.foo.com/';
+	$w->addPrefix($ns, '');
+	$w->startTag([$ns, 'doc']);
+	$w->characters("\n");
+	$w->emptyTag([$ns, 'ptr1']);
+	$w->characters("\n");
+	$w->emptyTag([$ns, 'ptr2']);
+	$w->characters("\n");
+	$w->endTag([$ns, 'doc']);
+	$w->end();
+	checkResult(<<"EOS", 'Check for proper default declaration nesting with top level.');
 <doc xmlns="$ns">
 <ptr1 />
 <ptr2 />
@@ -499,55 +598,384 @@ TEST: {
 EOS
 };
 
-
-# Test 38: Namespace error: attribute name beginning 'xmlns'
+# Namespace error: attribute name beginning 'xmlns'
 TEST: {
-  expectError(38, "Attribute name.*begins with 'xmlns'", eval {
-    $writer->emptyTag('foo', 'xmlnsxxx' => 'x');
-  });
+	initEnv();
+	expectError("Attribute name.*begins with 'xmlns'", eval {
+		$w->emptyTag('foo', 'xmlnsxxx' => 'x');
+	});
 };
 
-
-# Test 39: Namespace error: Detect an illegal colon in a PI target.
+# Namespace error: Detect an illegal colon in a PI target.
 TEST: {
-  expectError(39, "PI target.*contains a colon", eval {
-    $writer->pi('foo:foo');
-  });
+	initEnv();
+	expectError("PI target.*contains a colon", eval {
+		$w->pi('foo:foo');
+	});
 };
 
-
-# Test 40: Namespace error: Detect an illegal colon in an element name.
+# Namespace error: Detect an illegal colon in an element name.
 TEST: {
-  expectError(40, "Element name.*contains a colon", eval {
-    $writer->emptyTag('foo:foo');
-  });
+	initEnv();
+	expectError("Element name.*contains a colon", eval {
+		$w->emptyTag('foo:foo');
+	});
 };
 
-
-# Test 41: Namespace error: Detect an illegal colon in local part of
-# an element name.
+# Namespace error: Detect an illegal colon in local part of an element name.
 TEST: {
-  expectError(41, "Local part of element name.*contains a colon", eval {
-    my $ns = 'http://www.foo.com/';
-    $writer->emptyTag([$ns, 'foo:foo']);
-  });
+	initEnv();
+	expectError("Local part of element name.*contains a colon", eval {
+		my $ns = 'http://www.foo.com/';
+		$w->emptyTag([$ns, 'foo:foo']);
+	});
 };
 
-
-# Test 42: Namespace error: attribute name containing ':'.
+# Namespace error: attribute name containing ':'.
 TEST: {
-  expectError(42, "Attribute name.*contains ':'", eval {
-    $writer->emptyTag('foo', 'foo:bar' => 'x');
-  });
+	initEnv();
+	expectError("Attribute name.*contains ':'", eval {
+		$w->emptyTag('foo', 'foo:bar' => 'x');
+	});
 };
 
-
-# Test 43: Namespace error: Detect a colon in the local part of an att name.
+# Namespace error: Detect a colon in the local part of an att name.
 TEST: {
-  expectError(43, "Local part of attribute name.*contains a colon.", eval {
-    my $ns = "http://www.foo.com/";
-    $writer->emptyTag('foo', [$ns, 'foo:bar']);
-  });
+	initEnv();
+	expectError("Local part of attribute name.*contains a colon.", eval {
+		my $ns = "http://www.foo.com/";
+		$w->emptyTag('foo', [$ns, 'foo:bar']);
+	});
+};
+
+# Verify that no warning is generated when namespace prefixes are passed
+# in on construction.
+TEST: {
+	initEnv();
+	$w->emptyTag(['uri:null', 'element']);
+	$w->end();
+
+	wasNoWarning('No warnings should be generated during writing');
+};
+
+# Verify that the 'xml:' prefix is known, and that the declaration is not
+# passed through.
+#
+TEST: {
+	initEnv();
+	$w->emptyTag('elem', ['http://www.w3.org/XML/1998/namespace', 'space'] => 'preserve');
+	$w->end();
+
+	if (!unlike($bufStr, qr/1998/, "No declaration should be generated for the 'xml:' prefix"))
+	{
+		diag($bufStr);
+	}
+};
+
+# This is an API-driving test; to pass, it needs an added method to force XML
+# namespace declarations on outer elements that aren't necessarily
+# in the namespace themselves.
+TEST: {
+	initEnv(PREFIX_MAP => {'uri:test', 'test'},
+		FORCED_NS_DECLS => ['uri:test']
+	);
+
+	$w->startTag('doc');
+	$w->emptyTag(['uri:test', 'elem']);
+	$w->emptyTag(['uri:test', 'elem']);
+	$w->emptyTag(['uri:test', 'elem']);
+	$w->endTag('doc');
+	$w->end();
+
+	if (!unlike($bufStr, qr/uri:test.*uri:test/, 'An API should allow forced namespace declarations'))
+	{
+		diag($bufStr);
+	}
+};
+
+# Verify that a processing instruction of 'xml-stylesheet' can be added
+# without causing a warning, as well as a PI that contains 'xml'
+# other than at the beginning, and a PI with no data
+TEST: {
+	initEnv();
+	$w->pi('xml-stylesheet', "type='text/xsl' href='style.xsl'");
+	$w->pi('not-reserved-by-xml-spec', '');
+	$w->pi('pi-with-no-data');
+
+	$w->emptyTag('x');
+
+	$w->end();
+
+	wasNoWarning('The test processing instructions should not cause warnings');
+};
+
+# Verify that a still-reserved processing instruction generates 
+# a warning.
+TEST: {
+	initEnv();
+	$w->pi('xml-reserves-this-name');
+
+	$w->emptyTag('x');
+	$w->end();
+
+	ok($warning =~ "^Processing instruction target begins with 'xml'",
+		"Reserved processing instruction names should cause warnings");
+};
+
+# Processing instruction data may not contain '?>'
+TEST: {
+	initEnv();
+	expectError("Processing instruction may not contain", eval {
+		$w->pi('test', 'This string is bad?>');
+	});
+};
+	
+# A processing instruction name may not contain '?>'
+TEST: {
+	initEnv();
+	expectError("Processing instruction may not contain", eval {
+		$w->pi('bad-processing-instruction-bad?>');
+	});
+};
+
+# A processing instruction name can't contain spaces
+TEST: {
+	initEnv();
+	expectError("", eval {
+		$w->pi('processing instruction');
+	});
+};
+
+# Verify that dataMode can be turned on and off for specific elements
+TEST: {
+	initEnv(
+		DATA_MODE => 1,
+		DATA_INDENT => 1
+	);
+
+	ok($w->getDataMode(), 'Should be in data mode');
+	$w->startTag('doc');
+	$w->dataElement('data', 'This is data');
+	$w->dataElement('empty');
+	$w->emptyTag('empty');
+	$w->startTag('mixed');
+	$w->setDataMode(0);
+	$w->characters('This is ');
+	$w->emptyTag('mixed');
+	ok(!$w->getDataMode(), 'Should be in mixed mode');
+	$w->characters(' ');
+	$w->startTag('x');
+	$w->characters('content');
+	$w->endTag('x');
+	$w->characters('.');
+	$w->setDataMode(1);
+	$w->setDataIndent(5);
+	$w->endTag('mixed');
+	is($w->getDataIndent(), 5, 'Data indent should be changeable');
+	$w->dataElement('data', 'This is data');
+	$w->endTag('doc');
+	$w->end();
+
+	checkResult(<<"EOS", 'Turning dataMode on and off whilst writing');
+<doc>
+ <data>This is data</data>
+ <empty></empty>
+ <empty />
+ <mixed>This is <mixed /> <x>content</x>.</mixed>
+     <data>This is data</data>
+</doc>
+EOS
+};
+
+# Verify that DATA_MODE on its own doesn't cause warnings
+TEST: {
+	initEnv(
+		DATA_MODE => 1
+	);
+
+	$w->startTag('doc');
+	$w->endTag('doc');
+
+	wasNoWarning('DATA_MODE should not cause warnings');
+};
+
+# Test DATA_MODE and initial spacing
+TEST: {
+	initEnv(
+		DATA_MODE => 1
+	);
+
+	$w->emptyTag('doc');
+	$w->end();
+	checkResult("<doc />\n", "An empty element with DATA_MODE");
+};
+
+# Test DATA_MODE and initial spacing
+TEST: {
+	initEnv(
+		DATA_MODE => 1
+	);
+
+	$w->xmlDecl();
+	$w->emptyTag('doc');
+	$w->end();
+	checkResult(<<"EOS", "An empty element with DATA_MODE");
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doc />
+EOS
+};
+
+# Writing without namespaces should allow colons
+TEST: {
+	initEnv(NAMESPACES => 0);
+	$w->startTag('test:doc', 'x:attr' => 'value');
+	$w->endTag('test:doc');
+
+	checkResult('<test:doc x:attr="value"></test:doc>', 'A namespace-less document that uses colons in names');
+};
+
+# Test with NEWLINES
+TEST: {
+	initEnv(NEWLINES => 1);
+	$w->startTag('test');
+	$w->endTag('test');
+	$w->end();
+
+	checkResult("<test\n></test\n>\n", 'Use of the NEWLINES parameter');
+};
+
+# Test bad comments
+TEST: {
+	initEnv();
+	expectError("Comment may not contain '-->'", eval {
+		$w->comment('A bad comment -->');
+	});
+};
+
+# Test invadvisible comments
+TEST: {
+	initEnv();
+	$w->comment("Comments shouldn't contain double dashes i.e., --");
+	$w->emptyTag('x');
+	$w->end();
+
+	ok($warning =~ "Interoperability problem: ", 'Comments with doubled dashes should cause warnings');
+};
+
+# Expect to break on mixed content in data mode
+TEST: {
+	initEnv();
+	$w->setDataMode(1);
+	$w->startTag('x');
+	$w->characters('Text');
+	expectError("Mixed content not allowed in data mode: element x", eval {
+		$w->startTag('x');
+	});
+};
+
+# Break with mixed content with emptyTag as well
+TEST: {
+	initEnv();
+	$w->setDataMode(1);
+	$w->startTag('x');
+	$w->characters('Text');
+	expectError("Mixed content not allowed in data mode: element empty", eval {
+		$w->emptyTag('empty');
+	});
+};
+
+# Break with mixed content when the element is written before the characters
+TEST: {
+	initEnv();
+	$w->setDataMode(1);
+	$w->startTag('x');
+	$w->emptyTag('empty');
+	expectError("Mixed content not allowed in data mode: characters", eval {
+		$w->characters('Text');
+	});
+};
+
+# Break if there are two attributes with the same name
+TEST: {
+	initEnv(NAMESPACES => 0);
+	expectError("Two attributes named", eval {
+		$w->emptyTag('x', 'a' => 'First', 'a' => 'Second');
+	});
+};
+
+# Break if there are two attributes with the same namespace-qualified name
+TEST: {
+	initEnv();
+	expectError("Two attributes named", eval {
+		$w->emptyTag('x', ['x', 'a'] => 'First', ['x', 'a'] => 'Second');
+	});
+};
+
+# Succeed if there are two attributes with the same local name, but
+# in different namespaces
+TEST: {
+	initEnv();
+	$w->emptyTag('x', ['x', 'a'] => 'First', ['y', 'a'] => 'Second');
+	checkResult('<x __NS1:a="First" __NS2:a="Second" xmlns:__NS1="x" xmlns:__NS2="y" />', 'Two attributes with the same local name, but in different namespaces');
+};
+
+# Check failure when characters are written outside the document
+TEST: {
+	initEnv();
+	expectError('Attempt to insert characters outside of document element',
+		eval {
+			$w->characters('This should fail.');
+		});
+};
+
+# Make sure that closing a tag straight off fails
+TEST: {
+	initEnv();
+	expectError('End tag .* does not close any open element', eval {
+		$w->endTag('x');
+	});
+};
+
+# Use UNSAFE to allow attributes with emptyTag
+TEST: {
+	initEnv(UNSAFE => 1);
+	$w->emptyTag('x', 'xml:space' => 'preserve', ['x', 'y'] => 'z');
+	$w->end();
+	checkResult("<x xml:space=\"preserve\" __NS1:y=\"z\" xmlns:__NS1=\"x\" />\n", 'Using UNSAFE to bypass the namespace system for emptyTag');
+};
+
+# Use UNSAFE to allow attributes with startTag
+TEST: {
+	initEnv(UNSAFE => 1);
+	$w->startTag('sys:element', 'xml:space' => 'preserve', ['x', 'y'] => 'z');
+	$w->endTag('sys:element');
+	$w->end();
+	checkResult("<sys:element xml:space=\"preserve\" __NS1:y=\"z\" xmlns:__NS1=\"x\"></sys:element>\n", 'Using UNSAFE to bypass the namespace system for startTag');
+};
+
+# Exercise nesting and namespaces
+TEST: {
+	initEnv();
+	$w->startTag(['a', 'element']);
+	$w->startTag(['a', 'element']);
+	$w->startTag(['b', 'element']);
+	$w->startTag(['b', 'element']);
+	$w->startTag(['c', 'element']);
+	$w->startTag(['d', 'element']);
+	$w->endTag(['d', 'element']);
+	$w->startTag(['d', 'element']);
+	$w->endTag(['d', 'element']);
+	$w->endTag(['c', 'element']);
+	$w->endTag(['b', 'element']);
+	$w->endTag(['b', 'element']);
+	$w->endTag(['a', 'element']);
+	$w->endTag(['a', 'element']);
+	$w->end();
+
+	checkResult(<<"EOS", "Deep-nesting, to exercise prefix management");
+<__NS1:element xmlns:__NS1="a"><__NS1:element><__NS2:element xmlns:__NS2="b"><__NS2:element><__NS3:element xmlns:__NS3="c"><__NS4:element xmlns:__NS4="d"></__NS4:element><__NS4:element xmlns:__NS4="d"></__NS4:element></__NS3:element></__NS2:element></__NS2:element></__NS1:element></__NS1:element>
+EOS
 };
 
 1;

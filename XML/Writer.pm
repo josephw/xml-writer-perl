@@ -3,7 +3,7 @@
 # Copyright (c) 1999 by Megginson Technologies.
 # No warranty.  Commercial and non-commercial use freely permitted.
 #
-# $Id: Writer.pm,v 1.2 2003/10/18 20:18:58 ed Exp $
+# $Id$
 ########################################################################
 
 package XML::Writer;
