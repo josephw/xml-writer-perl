@@ -1,5 +1,20 @@
 Revision history for Perl extension XML::Writer.
 
-0.01  Mon Apr 19 12:27:36 1999
-	- original version; created by h2xs 1.19
+0.2
+	- added Namespace support (XML::Writer::Namespaces subclass
+	  and NAMESPACES constructor parameter)
+	- added PREFIX_MAP constructor parameter, and
+	  add/removePrefix() methods for Namespace support
+	- added getOutput() and setOutput() methods
+        - added new query methods in_element(), within_element(),
+          current_element(), and ancestor()
+        - changed constructor to use parameterized arguments
+        - added constructor option to insert newlines in tags
+        - element name is now optional in endTag() method
+        - fixed test.pl to work on Mac, and added new test
+        - added more examples in documentation
+        - require at least Perl 5.004
+
+0.1  Mon Apr 19 12:27:36 1999
+        - original version; created by h2xs 1.19
 
