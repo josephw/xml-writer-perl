@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 166);
+use Test::More(tests => 168);
 
 
 # Catch warnings
@@ -106,7 +106,7 @@ sub checkResult($$)
 		}
 	}
 
-	wasNoWarning('Expected result tests should not cause warnings');
+	wasNoWarning('(no warnings)');
 }
 
 #
@@ -1347,20 +1347,26 @@ SKIP: {
 	initEnv(ENCODING => 'utf-8', DATA_MODE => 1);
 
 	$w->xmlDecl();
+	$w->comment("\$ \x{A3} \x{20AC}");
 	$w->startTag('a');
 	$w->dataElement('b', '$');
 	$w->dataElement('b', "\x{A3}");
 	$w->dataElement('b', "\x{20AC}");
+	$w->startTag('c');
+	$w->cdata(" \$ \x{A3} \x{20AC} ");
+	$w->endTag('c');
 	$w->endTag('a');
 	$w->end();
 
 	checkResult(<<EOR, 'When requested, output should be UTF-8 encoded');
 <?xml version="1.0" encoding="utf-8"?>
+<!-- \$ \x{C2}\x{A3} \x{E2}\x{82}\x{AC} -->
 
 <a>
 <b>\x{24}</b>
 <b>\x{C2}\x{A3}</b>
 <b>\x{E2}\x{82}\x{AC}</b>
+<c><![CDATA[ \$ \x{C2}\x{A3} \x{E2}\x{82}\x{AC} ]]></c>
 </a>
 EOR
 };
@@ -1407,6 +1413,36 @@ TEST: {
 	expectError('encoding', eval {
 		initEnv(ENCODING => 'x-unsupported-encoding');
 	});
+}
+
+# Make sure scalars are built up as UTF-8 (if UTF-8 is passed in)
+SKIP: {
+	skip 'Unicode only supported with Perl >= 5.8', 2 unless $] >= 5.008;
+
+	my $s;
+
+	$w = new XML::Writer(OUTPUT => \$s);
+
+	my $x = 'x';
+	utf8::upgrade($x);
+
+	$w->emptyTag($x);
+	$w->end();
+
+	ok(utf8::is_utf8($s), 'A storage scalar should preserve utf8-ness');
+
+
+	undef($s);
+	$w = new XML::Writer(OUTPUT => \$s);
+	$w->startTag('a');
+	$w->dataElement('x', "\$");
+	$w->dataElement('x', "\x{A3}");
+	$w->dataElement('x', "\x{20AC}");
+	$w->endTag('a');
+	$w->end();
+
+	is($s, "<a><x>\$</x><x>\x{A3}</x><x>\x{20AC}</x></a>\n",
+		'A storage scalar should work with utf8 strings');
 }
 
 
