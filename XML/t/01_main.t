@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 164);
+use Test::More(tests => 166);
 
 
 # Catch warnings
@@ -1392,6 +1392,23 @@ TEST: {
 
 	is($s, "<txt>blah</txt></foo>\n", 'Resetting the scalar should work properly');
 };
+
+# Ensure that ENCODING and SCALAR don't cause failure when used together
+TEST: {
+	my $s;
+
+	ok(eval {$w = new XML::Writer(OUTPUT => \$s,
+		ENCODING => 'utf-8'
+	);}, 'OUTPUT and ENCODING should not cause failure');
+}
+
+# Verify that unknown encodings cause failure
+TEST: {
+	expectError('encoding', eval {
+		initEnv(ENCODING => 'x-unsupported-encoding');
+	});
+}
+
 
 # Free test resources
 $outputFile->close() or die "Unable to close temporary file: $!";

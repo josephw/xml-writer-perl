@@ -430,16 +430,18 @@ sub new {
     my $newOutput = $_[0];
 
     if (ref($newOutput) eq 'SCALAR') {
-      $newOutput = new XML::Writer::_String($newOutput);
-    }
+      $output = new XML::Writer::_String($newOutput);
+    } else {
                                 # If there is no OUTPUT parameter,
                                 # use standard output
-    $output = $newOutput || \*STDOUT;
-    if ($outputEncoding) {
-      if (lc($outputEncoding) ne 'utf-8') {
-        die 'The only supported encoding is utf-8';
+      $output = $newOutput || \*STDOUT;
+      if ($outputEncoding) {
+        if (lc($outputEncoding) eq 'utf-8') {
+          binmode($output, ':encoding(utf-8)');
+        } else {
+          die 'The only supported encoding is utf-8';
+        }
       }
-      binmode($output, ':encoding(utf-8)');
     }
   };
 
@@ -1154,7 +1156,8 @@ Arguments are an anonymous hash array of parameters:
 An object blessed into IO::Handle or one of its subclasses (such as
 IO::File), or a reference to a string; if this parameter is not present,
 the module will write to standard output. If a string reference is passed,
-it will capture the generated XML.
+it will capture the generated XML (as a string; to get bytes use the
+C<Encode> module).
 
 =item NAMESPACES
 
@@ -1249,7 +1252,7 @@ closed:
 
 Add an XML declaration to the beginning of an XML document.  The
 version will always be "1.0".  If you provide a non-null encoding or
-standalone argument, its value will appear in the declaration (and
+standalone argument, its value will appear in the declaration (any
 non-null value for standalone except 'no' will automatically be
 converted to 'yes').
 
