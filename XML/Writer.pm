@@ -1561,7 +1561,7 @@ David Megginson E<lt>david@megginson.comE<gt>
 
 Copyright 1999, 2000 David Megginson E<lt>david@megginson.comE<gt>
 
-Copyright 2004 Joseph Walton E<lt>joe@kafsemo.orgE<gt>
+Copyright 2004, 2005 Joseph Walton E<lt>joe@kafsemo.orgE<gt>
 
 
 =head1 SEE ALSO
