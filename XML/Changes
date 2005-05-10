@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Writer.
 
+0.540 Tue May 10 18:18:58 BST 2005    <joe@kafsemo.org>
+	- Don't die when ENCODING is specified with a scalar OUTPUT.
+	- Add support for US-ASCII encoding.
+
 0.531 Mon Mar 14 22:11:33 GMT 2005    <joe@kafsemo.org>
 	- Rename internal String package to avoid clash with external modules.
 	- Fix Unicode test skipping for Perls before 5.8.
