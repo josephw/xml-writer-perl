@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 168);
+use Test::More(tests => 175);
 
 
 # Catch warnings
@@ -1443,6 +1443,83 @@ SKIP: {
 
 	is($s, "<a><x>\$</x><x>\x{A3}</x><x>\x{20AC}</x></a>\n",
 		'A storage scalar should work with utf8 strings');
+}
+
+# Test US-ASCII encoding
+SKIP: {
+	skip 'Unicode only supported with Perl >= 5.8', 7 unless $] >= 5.008;
+
+	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
+
+	$w->xmlDecl();
+	$w->startTag('a');
+	$w->dataElement('x', "\$", 'a' => "\$");
+	$w->dataElement('x', "\x{A3}", 'a' => "\x{A3}");
+	$w->dataElement('x', "\x{20AC}", 'a' => "\x{20AC}");
+	$w->endTag('a');
+	$w->end();
+
+	checkResult(<<'EOR', 'US-ASCII support should cover text and attributes');
+<?xml version="1.0" encoding="us-ascii"?>
+
+<a>
+<x a="$">$</x>
+<x a="&#xA3;">&#xA3;</x>
+<x a="&#x20AC;">&#x20AC;</x>
+</a>
+EOR
+
+
+	# Make sure non-ASCII characters that can't be represented
+	#  as references cause failure
+	my $text = "\x{A3}";
+#	utf8::upgrade($text);
+
+	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
+	$w->startTag('a');
+	$w->cdata('Text');
+	expectError('ASCII', eval {
+		$w->cdata($text);
+	});
+
+
+	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
+	$w->startTag('a');
+	$w->comment('Text');
+	expectError('ASCII', eval {
+		$w->comment($text);
+	});
+
+
+	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
+	expectError('ASCII', eval {
+		$w->emptyTag("\x{DC}berpr\x{FC}fung");
+	});
+
+
+	# Make sure Unicode generates warnings when it makes it through
+	#  to a US-ASCII-encoded stream
+	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1, UNSAFE => 1);
+	$w->startTag('a');
+	$w->cdata($text);
+	$w->endTag('a');
+	$w->end();
+
+	$outputFile->flush();
+	ok($warning && $warning =~ /does not map to ascii/,
+		'Perl IO should warn about non-ASCII characters in output');
+	
+
+	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1, UNSAFE => 1);
+	$w->startTag('a');
+	$w->comment($text);
+	$w->endTag('a');
+	$w->end();
+
+	$outputFile->flush();
+	ok($warning && $warning =~ /does not map to ascii/,
+		'Perl IO should warn about non-ASCII characters in output');
+
 }
 
 

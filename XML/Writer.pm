@@ -59,6 +59,15 @@ sub new {
   }
 
   my $outputEncoding = $params{ENCODING};
+  my ($checkUnencodedRepertoire, $escapeEncoding);
+  if (lc($outputEncoding) eq 'us-ascii') {
+    $checkUnencodedRepertoire = \&_croakUnlessASCII;
+    $escapeEncoding = \&_escapeASCII;
+  } else {
+    my $doNothing = sub {};
+    $checkUnencodedRepertoire = $doNothing;
+    $escapeEncoding = $doNothing;
+  }
 
                                 # Parse variables
   my @elementStack = ();
@@ -81,6 +90,7 @@ sub new {
       my $aname = $atts->[$i++];
       my $value = _escapeLiteral($atts->[$i++]);
       $value =~ s/\x{a}/\&#10\;/g;
+      &{$escapeEncoding}($value);
       $output->print(" $aname=\"$value\"");
     }
   };
@@ -183,6 +193,7 @@ sub new {
     if ($data =~ /-->/) {
       croak("Comment may not contain '-->'");
     } else {
+      &{$checkUnencodedRepertoire}($data);
       $seen{ANYTHING} = 1;
       &{$comment};
     }
@@ -239,6 +250,7 @@ sub new {
   my $SAFE_startTag = sub {
     my $name = $_[0];
 
+    &{$checkUnencodedRepertoire}($name);
     _checkAttributes(\@_);
 
     if ($seen{ELEMENT} && $elementLevel == 0) {
@@ -273,6 +285,7 @@ sub new {
   my $SAFE_emptyTag = sub {
     my $name = $_[0];
 
+    &{$checkUnencodedRepertoire}($name);
     _checkAttributes(\@_);
 
     if ($seen{ELEMENT} && $elementLevel == 0) {
@@ -325,6 +338,7 @@ sub new {
       $data =~ s/\</\&lt\;/g;
       $data =~ s/\>/\&gt\;/g;
     }
+    &{$escapeEncoding}($data);
     $output->print($data);
     $hasData = 1;
   };
@@ -363,6 +377,7 @@ sub new {
     } elsif ($dataMode && $hasElement) {
       croak("Mixed content not allowed in data mode: characters");
     } else {
+      &{$checkUnencodedRepertoire}($_[0]);
       &{$cdata};
     }
   };
@@ -438,8 +453,10 @@ sub new {
       if ($outputEncoding) {
         if (lc($outputEncoding) eq 'utf-8') {
           binmode($output, ':encoding(utf-8)');
+        } elsif (lc($outputEncoding) eq 'us-ascii') {
+          binmode($output, ':encoding(us-ascii)');
         } else {
-          die 'The only supported encoding is utf-8';
+          die 'The only supported encodings are utf-8 and us-ascii';
         }
       }
     }
@@ -717,6 +734,16 @@ sub _escapeLiteral {
     $data =~ s/\"/\&quot\;/g;
   }
   return $data;
+}
+
+sub _escapeASCII($) {
+  $_[0] =~ s/([^\x00-\x7F])/sprintf('&#x%X;', ord($1))/ge;
+}
+
+sub _croakUnlessASCII($) {
+  if ($_[0] =~ /[^\x00-\x7F]/) {
+    croak('Non-ASCII characters are not permitted in this part of a US-ASCII document');
+  }
 }
 
 
@@ -1234,8 +1261,8 @@ data mode).
 
 =item ENCODING
 
-A character encoding; currently this must be exactly 'utf-8'. If present,
-it will be used for the underlying character encoding and as the
+A character encoding; currently this must be one of 'utf-8' or 'us-ascii'.
+If present, it will be used for the underlying character encoding and as the
 default in the XML declaration.
 
 =back
