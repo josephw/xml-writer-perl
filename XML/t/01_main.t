@@ -100,6 +100,7 @@ sub checkResult($$)
 					DISCARD_B => sub { diag("+$a[$_[1]]\n"); }
 				});
 			} else {
+				fail($explanation);
 				diag("         got: '$actual'\n");
 				diag("    expected: '$expected'\n");
 			}
