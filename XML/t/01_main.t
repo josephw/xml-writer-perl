@@ -32,6 +32,14 @@ sub wasNoWarning($)
 	}
 }
 
+# Constants for Unicode support
+my $unicodeSkipMessage = 'Unicode only supported with Perl >= 5.8';
+
+sub isUnicodeSupported()
+{
+	return $] >= 5.008
+}
+
 require XML::Writer;
 
 wasNoWarning('Loading XML::Writer should not result in warnings');
@@ -1343,7 +1351,7 @@ TEST: {
 
 # Make sure UTF-8 is written properly
 SKIP: {
-	skip 'Unicode only supported with Perl >= 5.8', 2 unless $] >= 5.008;
+	skip $unicodeSkipMessage, 2 unless isUnicodeSupported();
 
 	initEnv(ENCODING => 'utf-8', DATA_MODE => 1);
 
@@ -1418,7 +1426,7 @@ TEST: {
 
 # Make sure scalars are built up as UTF-8 (if UTF-8 is passed in)
 SKIP: {
-	skip 'Unicode only supported with Perl >= 5.8', 2 unless $] >= 5.008;
+	skip $unicodeSkipMessage, 2 unless isUnicodeSupported();
 
 	my $s;
 
@@ -1448,7 +1456,7 @@ SKIP: {
 
 # Test US-ASCII encoding
 SKIP: {
-	skip 'Unicode only supported with Perl >= 5.8', 7 unless $] >= 5.008;
+	skip $unicodeSkipMessage, 7 unless isUnicodeSupported();
 
 	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
 
