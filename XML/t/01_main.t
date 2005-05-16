@@ -33,11 +33,11 @@ sub wasNoWarning($)
 }
 
 # Constants for Unicode support
-my $unicodeSkipMessage = 'Unicode only supported with Perl >= 5.8';
+my $unicodeSkipMessage = 'Unicode only supported with Perl >= 5.8.1';
 
 sub isUnicodeSupported()
 {
-	return $] >= 5.008
+	return $] >= 5.008001;
 }
 
 require XML::Writer;
