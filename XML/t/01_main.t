@@ -55,7 +55,7 @@ my $outputFile = IO::File->new_tmpfile or die "Unable to create temporary file: 
 sub getBufStr()
 {
 	local($/);
-	binmode($outputFile, ':bytes') if $] >= 5.008;
+	binmode($outputFile, ':bytes') if isUnicodeSupported();
 	$outputFile->seek(0, 0);
 	return <$outputFile>;
 }
@@ -68,6 +68,7 @@ sub initEnv(@)
 	# Reset the scratch file
 	$outputFile->seek(0, 0);
 	$outputFile->truncate(0);
+	binmode($outputFile, ':raw');
 
 	# Overwrite OUTPUT so it goes to the scratch file
 	$args{'OUTPUT'} = $outputFile;
