@@ -89,7 +89,7 @@ sub new {
     while ($atts->[$i]) {
       my $aname = $atts->[$i++];
       my $value = _escapeLiteral($atts->[$i++]);
-      $value =~ s/\x{a}/\&#10\;/g;
+      $value =~ s/\x0a/\&#10\;/g;
       &{$escapeEncoding}($value);
       $output->print(" $aname=\"$value\"");
     }
