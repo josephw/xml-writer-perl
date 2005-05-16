@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Writer.
 
+0.545 Mon May 16 08:11:17 BST 2005    <joe@kafsemo.org>
+	- Format comments like elements when in data mode.
+	- Only attempt Unicode tests for Perl >= 5.8.1.
+
 0.540 Tue May 10 18:18:58 BST 2005    <joe@kafsemo.org>
 	- Don't die when ENCODING is specified with a scalar OUTPUT.
 	- Add support for US-ASCII encoding.
