@@ -1305,7 +1305,7 @@ just a system ID by passing 'undef' for the publicId.
 Add a comment to an XML document.  If the comment appears outside the
 document element (either before the first start tag or after the last
 end tag), the module will add a carriage return after it to improve
-readability:
+readability. In data mode, comments will be treated as empty tags:
 
   $writer->comment("This is a comment");
 
