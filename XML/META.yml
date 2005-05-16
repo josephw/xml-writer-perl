@@ -12,6 +12,11 @@ license:      perl
 distribution_type: module
 installdirs:  site
 
+build_requires:
+  perl: 5.006_000
+recommends:
+  perl: 5.008_001
+
 no_index:
   package:
     - XML::Writer::Namespaces
