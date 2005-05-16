@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 177);
+use Test::More(tests => 181);
 
 
 # Catch warnings
@@ -1565,6 +1565,31 @@ TEST: {
  <y></y>
 </x>
 <!-- Test 5 -->
+EOR
+}
+
+# Test characters outside the BMP
+SKIP: {
+	skip $unicodeSkipMessage, 4 unless isUnicodeSupported();
+
+	my $s = "\x{10480}"; # U+10480 OSMANYA LETTER ALEF
+
+	initEnv(ENCODING => 'utf-8');
+
+	$w->dataElement('x', $s);
+	$w->end();
+
+	checkResult(<<"EOR", 'Characters outside the BMP should be encoded correctly in UTF-8');
+<x>\xF0\x90\x92\x80</x>
+EOR
+
+	initEnv(ENCODING => 'us-ascii');
+
+	$w->dataElement('x', $s);
+	$w->end();
+
+	checkResult(<<'EOR', 'Characters outside the BMP should be encoded correctly in US-ASCII');
+<x>&#x10480;</x>
 EOR
 }
 
