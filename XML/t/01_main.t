@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 175);
+use Test::More(tests => 177);
 
 
 # Catch warnings
@@ -1529,6 +1529,42 @@ EOR
 	ok($warning && $warning =~ /does not map to ascii/,
 		'Perl IO should warn about non-ASCII characters in output');
 
+}
+
+# Make sure comments are formatted in data mode
+TEST: {
+	initEnv(DATA_MODE => 1, DATA_INDENT => 1);
+
+	$w->xmlDecl();
+	$w->comment("Test");
+	$w->comment("Test");
+	$w->startTag("x");
+	$w->comment("Test 2");
+	$w->startTag("y");
+	$w->comment("Test 3");
+	$w->endTag("y");
+	$w->comment("Test 4");
+	$w->startTag("y");
+	$w->endTag("y");
+	$w->endTag("x");
+	$w->end();
+	$w->comment("Test 5");
+
+	checkResult(<<'EOR', 'Comments should be formatted like elements when in data mode');
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test -->
+<!-- Test -->
+
+<x>
+ <!-- Test 2 -->
+ <y>
+  <!-- Test 3 -->
+ </y>
+ <!-- Test 4 -->
+ <y></y>
+</x>
+<!-- Test 5 -->
+EOR
 }
 
 

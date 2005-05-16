@@ -177,8 +177,14 @@ sub new {
 
   my $comment = sub {
     my $data = $_[0];
+    if ($dataMode && $elementLevel) {
+      $output->print("\n");
+      $output->print(" " x ($elementLevel * $dataIndent));
+    }
     $output->print("<!-- $data -->");
-    if ($elementLevel == 0) {
+    if ($dataMode && $elementLevel) {
+      $hasElement = 1;
+    } elsif ($elementLevel == 0) {
       $output->print("\n");
       $hasHeading = 1;
     }
