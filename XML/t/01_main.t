@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 181);
+use Test::More(tests => 184);
 
 
 # Catch warnings
@@ -1591,6 +1591,18 @@ EOR
 	checkResult(<<'EOR', 'Characters outside the BMP should be encoded correctly in US-ASCII');
 <x>&#x10480;</x>
 EOR
+}
+
+
+# Ensure 'ancestor' returns undef beyond the document
+TEST: {
+	initEnv();
+
+	is($w->ancestor(0), undef, 'With no document, ancestors should be undef');
+
+	$w->startTag('x');
+	is($w->ancestor(0), 'x', 'ancestor(0) should return the current element');
+	is($w->ancestor(1), undef, 'ancestor should return undef beyond the document');
 }
 
 

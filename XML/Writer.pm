@@ -439,7 +439,11 @@ sub new {
 
   $self->{'ANCESTOR'} = sub {
     my ($n) = (@_);
-    return $elementStack[$#elementStack-$n];
+    if ($n < scalar(@elementStack)) {
+      return $elementStack[$#elementStack-$n];
+    } else {
+      return undef;
+    }
   };
 
                                 # Set and get the output destination.
