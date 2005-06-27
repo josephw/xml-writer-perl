@@ -355,6 +355,7 @@ sub new {
     } elsif ($dataMode && $hasElement) {
       croak("Mixed content not allowed in data mode: characters");
     } else {
+      _croakUnlessDefinedCharacters($_[0]);
       &{$characters};
     }
   };
@@ -383,6 +384,7 @@ sub new {
     } elsif ($dataMode && $hasElement) {
       croak("Mixed content not allowed in data mode: characters");
     } else {
+      _croakUnlessDefinedCharacters($_[0]);
       &{$checkUnencodedRepertoire}($_[0]);
       &{$cdata};
     }
@@ -714,7 +716,7 @@ sub removePrefix {
 ########################################################################
 
 #
-# Private: check for duplicate attributes.
+# Private: check for duplicate attributes and bad characters.
 # Note - this starts at $_[1], because $_[0] is assumed to be an
 # element name.
 #
@@ -723,12 +725,14 @@ sub _checkAttributes {
   my $i = 1;
   while ($_[0]->[$i]) {
     my $name = $_[0]->[$i];
-    $i += 2;
+    $i += 1;
     if ($anames{$name}) {
       croak("Two attributes named \"$name\"");
     } else {
       $anames{$name} = 1;
     }
+    _croakUnlessDefinedCharacters($_[0]->[$i]);
+    $i += 1;
   }
 }
 
@@ -756,6 +760,13 @@ sub _croakUnlessASCII($) {
   }
 }
 
+# Enforce XML 1.0, section 2.2's definition of "Char" (only reject low ASCII,
+#  so as not to require Unicode support from perl)
+sub _croakUnlessDefinedCharacters($) {
+  if ($_[0] =~ /([\x00-\x08\x0B-\x0C\x0E-\x1F])/) {
+    croak(sprintf('Code point \u%04X is not a valid character in XML', ord($1)));
+  }
+}
 
 
 ########################################################################

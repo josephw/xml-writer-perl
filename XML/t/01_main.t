@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 184);
+use Test::More(tests => 199);
 
 
 # Catch warnings
@@ -1603,6 +1603,92 @@ TEST: {
 	$w->startTag('x');
 	is($w->ancestor(0), 'x', 'ancestor(0) should return the current element');
 	is($w->ancestor(1), undef, 'ancestor should return undef beyond the document');
+}
+
+# Don't allow undefined Unicode characters, but do allow whitespace
+TEST: {
+	# Test characters
+
+	initEnv();
+
+	$w->startTag('x');
+	expectError('\u0000', eval {
+		$w->characters("\x00");
+	});
+
+	initEnv();
+
+	$w->dataElement('x', "\x09\x0A\x0D ");
+	$w->end();
+
+	checkResult(<<"EOR", 'Whitespace below \u0020 is valid.');
+<x>\x09\x0A\x0D </x>
+EOR
+
+
+	# CDATA
+
+	initEnv();
+	$w->startTag('x');
+	expectError('\u0000', eval {
+		$w->cdata("\x00");
+	});
+
+	initEnv();
+
+	$w->startTag('x');
+	$w->cdata("\x09\x0A\x0D ");
+	$w->endTag('x');
+	$w->end();
+
+	checkResult(<<"EOR", 'Whitespace below \u0020 is valid.');
+<x><![CDATA[\x09\x0A\x0D ]]></x>
+EOR
+
+
+	# Attribute values
+
+	initEnv();
+	expectError('\u0000', eval {
+		$w->emptyTag('x', 'a' => "\x00");
+	});
+
+	initEnv();
+	$w->emptyTag('x', 'a' => "\x09\x0A\x0D ");
+	$w->end();
+
+	# Currently, \u000A is escaped. This test is for lack of errors,
+	#  not exact serialisation, so change it if necessary.
+	checkResult(<<"EOR", 'Whitespace below \u0020 is valid.');
+<x a="\x09&#10;\x0D " />
+EOR
+}
+
+# Unsafe mode should not enforce character validity tests
+TEST: {
+	initEnv(UNSAFE => 1);
+
+	$w->dataElement('x', "\x00");
+	$w->end();
+	checkResult(<<"EOR", 'Unsafe mode should not enforce character validity tests');
+<x>\x00</x>
+EOR
+
+	initEnv(UNSAFE => 1);
+	$w->startTag('x');
+	$w->cdata("\x00");
+	$w->endTag('x');
+	$w->end();
+	checkResult(<<"EOR", 'Unsafe mode should not enforce character validity tests');
+<x><![CDATA[\x00]]></x>
+EOR
+
+	initEnv(UNSAFE => 1);
+	$w->emptyTag('x', 'a' => "\x00");
+	$w->end();
+	checkResult(<<"EOR", 'Unsafe mode should not enforce character validity tests');
+<x a="\x00" />
+EOR
 }
 
 
