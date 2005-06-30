@@ -121,10 +121,12 @@ sub new {
       $standalone = 'yes';
     }
 
-    # This line is questionable, but changing current behaviour
-    # may be a bad idea. There seems to be a mismatch with the
-    # documentation, though.
-    $encoding ||= $outputEncoding || "UTF-8";
+    # Only include an encoding if one has been explicitly supplied,
+    #  either here or on construction. Allow the empty string
+    #  to suppress it.
+    if (!defined($encoding)) {
+      $encoding = $outputEncoding;
+    }
     $output->print("<?xml version=\"1.0\"");
     if ($encoding) {
       $output->print(" encoding=\"$encoding\"");
@@ -1302,7 +1304,8 @@ Add an XML declaration to the beginning of an XML document.  The
 version will always be "1.0".  If you provide a non-null encoding or
 standalone argument, its value will appear in the declaration (any
 non-null value for standalone except 'no' will automatically be
-converted to 'yes').
+converted to 'yes'). If not given here, the encoding will be taken from the
+ENCODING argument. Pass the empty string to suppress this behaviour.
 
   $writer->xmlDecl("UTF-8");
 

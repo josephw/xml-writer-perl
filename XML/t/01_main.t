@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 199);
+use Test::More(tests => 207);
 
 
 # Catch warnings
@@ -154,7 +154,7 @@ TEST: {
 	$w->emptyTag("foo");
 	$w->end();
 	checkResult(<<"EOS", 'Empty element tag with XML declaration');
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <foo />
 EOS
 };
@@ -213,7 +213,7 @@ TEST: {
 	$w->emptyTag("foo");
 	$w->end();
 	checkResult(<<"EOS", 'A document with "standalone" declared');
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" standalone="yes"?>
 <foo />
 EOS
 };
@@ -225,7 +225,7 @@ TEST: {
 	$w->emptyTag("foo");
 	$w->end();
 	checkResult(<<"EOS", "A document with 'standalone' declared as 'no'");
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" standalone="no"?>
 <foo />
 EOS
 };
@@ -875,7 +875,7 @@ TEST: {
 	$w->emptyTag('doc');
 	$w->end();
 	checkResult(<<"EOS", "An empty element with DATA_MODE");
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 
 <doc />
 EOS
@@ -894,7 +894,7 @@ TEST: {
 	$w->endTag('doc');
 	$w->end();
 	checkResult(<<"EOS", "A nested element with DATA_MODE and a declaration");
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 
 <doc>
  <item />
@@ -1552,7 +1552,7 @@ TEST: {
 	$w->comment("Test 5");
 
 	checkResult(<<'EOR', 'Comments should be formatted like elements when in data mode');
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!-- Test -->
 <!-- Test -->
 
@@ -1688,6 +1688,51 @@ EOR
 	$w->end();
 	checkResult(<<"EOR", 'Unsafe mode should not enforce character validity tests');
 <x a="\x00" />
+EOR
+}
+
+# Cover XML declaration encoding cases
+TEST: {
+	# No declaration unless specified
+	initEnv();
+	$w->xmlDecl();
+	$w->emptyTag('x');
+	$w->end();
+
+	checkResult(<<"EOR", 'When no encoding is specified, the declaration should not include one');
+<?xml version="1.0"?>
+<x />
+EOR
+
+	# An encoding specified in the constructor carries across to the declaration
+	initEnv(ENCODING => 'us-ascii');
+	$w->xmlDecl();
+	$w->emptyTag('x');
+	$w->end();
+
+	checkResult(<<"EOR", 'If an encoding is specified for the document, it should appear in the declaration');
+<?xml version="1.0" encoding="us-ascii"?>
+<x />
+EOR
+
+	# Anything passed in the xmlDecl call should override
+	initEnv(ENCODING => 'us-ascii');
+	$w->xmlDecl('utf-8');
+	$w->emptyTag('x');
+	$w->end();
+	checkResult(<<"EOR", 'An encoding passed to xmlDecl should override any other encoding');
+<?xml version="1.0" encoding="utf-8"?>
+<x />
+EOR
+
+	# The empty string should force the omission of the decl
+	initEnv(ENCODING => 'us-ascii');
+	$w->xmlDecl('');
+	$w->emptyTag('x');
+	$w->end();
+	checkResult(<<"EOR", 'xmlDecl should treat the empty string as instruction to omit the encoding from the declaration');
+<?xml version="1.0"?>
+<x />
 EOR
 }
 
