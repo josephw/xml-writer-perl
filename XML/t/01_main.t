@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 207);
+use Test::More(tests => 210);
 
 
 # Catch warnings
@@ -1733,6 +1733,23 @@ EOR
 	checkResult(<<"EOR", 'xmlDecl should treat the empty string as instruction to omit the encoding from the declaration');
 <?xml version="1.0"?>
 <x />
+EOR
+}
+
+# Bug report: [cpan #14854] Broken namespace report
+# Passing a list reference as an argument should work more than once
+TEST: {
+	my $t = ['uri:test', 'elem'];
+
+	initEnv(PREFIX_MAP => {'uri:test' => 'prefix'});
+
+	$w->startTag($t);
+	ok(eval {$w->emptyTag($t);}, 'Passing an array twice should not cause failure');
+	$w->endTag($t);
+	$w->end();
+
+	checkResult(<<"EOR", 'An array passed by reference should not be modified');
+<prefix:elem xmlns:prefix="uri:test"><prefix:elem /></prefix:elem>
 EOR
 }
 
