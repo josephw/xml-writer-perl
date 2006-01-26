@@ -42,7 +42,10 @@ sub isUnicodeSupported()
 
 require XML::Writer;
 
-wasNoWarning('Loading XML::Writer should not result in warnings');
+SKIP: {
+	skip "Perl before 5.6 always warn when loading XML::Writer", 1 if $] <= 5.006;
+	wasNoWarning('Loading XML::Writer should not result in warnings');
+}
 
 use IO::File;
 
@@ -55,7 +58,7 @@ my $outputFile = IO::File->new_tmpfile or die "Unable to create temporary file: 
 sub getBufStr()
 {
 	local($/);
-	binmode($outputFile, ':bytes') if isUnicodeSupported();
+	binmode($outputFile, ':bytes') if $] >= 5.006 and isUnicodeSupported();
 	$outputFile->seek(0, 0);
 	return <$outputFile>;
 }
@@ -68,7 +71,7 @@ sub initEnv(@)
 	# Reset the scratch file
 	$outputFile->seek(0, 0);
 	$outputFile->truncate(0);
-	binmode($outputFile, ':raw');
+	binmode($outputFile, ':raw') if $] >= 5.006;
 
 	# Overwrite OUTPUT so it goes to the scratch file
 	$args{'OUTPUT'} = $outputFile;
@@ -721,7 +724,7 @@ TEST: {
 	$w->emptyTag('elem', ['http://www.w3.org/XML/1998/namespace', 'space'] => 'preserve');
 	$w->end();
 
-	if (!unlike(getBufStr(), qr/1998/, "No declaration should be generated for the 'xml:' prefix"))
+	if (!unlike(getBufStr(), '/1998/', "No declaration should be generated for the 'xml:' prefix"))
 	{
 		diag(getBufStr());
 	}
@@ -742,7 +745,7 @@ TEST: {
 	$w->endTag('doc');
 	$w->end();
 
-	if (!unlike(getBufStr(), qr/uri:test.*uri:test/, 'An API should allow forced namespace declarations'))
+	if (!unlike(getBufStr(), '/uri:test.*uri:test/', 'An API should allow forced namespace declarations'))
 	{
 		diag(getBufStr());
 	}
@@ -1357,26 +1360,26 @@ SKIP: {
 	initEnv(ENCODING => 'utf-8', DATA_MODE => 1);
 
 	$w->xmlDecl();
-	$w->comment("\$ \x{A3} \x{20AC}");
+	$w->comment("\$ \xA3 ".chr(0x20AC));
 	$w->startTag('a');
 	$w->dataElement('b', '$');
-	$w->dataElement('b', "\x{A3}");
-	$w->dataElement('b', "\x{20AC}");
+	$w->dataElement('b', "\xA3");
+	$w->dataElement('b', chr(0x20AC));
 	$w->startTag('c');
-	$w->cdata(" \$ \x{A3} \x{20AC} ");
+	$w->cdata(" \$ \xA3 ".chr(0x20AC)." ");
 	$w->endTag('c');
 	$w->endTag('a');
 	$w->end();
 
 	checkResult(<<EOR, 'When requested, output should be UTF-8 encoded');
 <?xml version="1.0" encoding="utf-8"?>
-<!-- \$ \x{C2}\x{A3} \x{E2}\x{82}\x{AC} -->
+<!-- \$ \xC2\xA3 \xE2\x82\xAC -->
 
 <a>
-<b>\x{24}</b>
-<b>\x{C2}\x{A3}</b>
-<b>\x{E2}\x{82}\x{AC}</b>
-<c><![CDATA[ \$ \x{C2}\x{A3} \x{E2}\x{82}\x{AC} ]]></c>
+<b>\x24</b>
+<b>\xC2\xA3</b>
+<b>\xE2\x82\xAC</b>
+<c><![CDATA[ \$ \xC2\xA3 \xE2\x82\xAC ]]></c>
 </a>
 EOR
 };
@@ -1446,12 +1449,12 @@ SKIP: {
 	$w = new XML::Writer(OUTPUT => \$s);
 	$w->startTag('a');
 	$w->dataElement('x', "\$");
-	$w->dataElement('x', "\x{A3}");
-	$w->dataElement('x', "\x{20AC}");
+	$w->dataElement('x', "\xA3");
+	$w->dataElement('x', chr(0x20AC));
 	$w->endTag('a');
 	$w->end();
 
-	is($s, "<a><x>\$</x><x>\x{A3}</x><x>\x{20AC}</x></a>\n",
+	is($s, "<a><x>\$</x><x>\xA3</x><x>".chr(0x20AC)."</x></a>\n",
 		'A storage scalar should work with utf8 strings');
 }
 
@@ -1464,8 +1467,8 @@ SKIP: {
 	$w->xmlDecl();
 	$w->startTag('a');
 	$w->dataElement('x', "\$", 'a' => "\$");
-	$w->dataElement('x', "\x{A3}", 'a' => "\x{A3}");
-	$w->dataElement('x', "\x{20AC}", 'a' => "\x{20AC}");
+	$w->dataElement('x', "\xA3", 'a' => "\xA3");
+	$w->dataElement('x', chr(0x20AC), 'a' => chr(0x20AC));
 	$w->endTag('a');
 	$w->end();
 
@@ -1482,7 +1485,7 @@ EOR
 
 	# Make sure non-ASCII characters that can't be represented
 	#  as references cause failure
-	my $text = "\x{A3}";
+	my $text = "\xA3";
 #	utf8::upgrade($text);
 
 	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
@@ -1503,7 +1506,7 @@ EOR
 
 	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
 	expectError('ASCII', eval {
-		$w->emptyTag("\x{DC}berpr\x{FC}fung");
+		$w->emptyTag("\xDCberpr\xFCfung");
 	});
 
 
@@ -1572,7 +1575,7 @@ EOR
 SKIP: {
 	skip $unicodeSkipMessage, 4 unless isUnicodeSupported();
 
-	my $s = "\x{10480}"; # U+10480 OSMANYA LETTER ALEF
+	my $s = chr(0x10480); # U+10480 OSMANYA LETTER ALEF
 
 	initEnv(ENCODING => 'utf-8');
 
