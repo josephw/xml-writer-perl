@@ -1257,7 +1257,7 @@ ancestor from the same namespace.
 A true or false value; if this parameter is present and its value is
 true, then the module will insert an extra newline before the closing
 delimiter of start, end, and empty tags to guarantee that the document
-does not end up as a single, long line.  If the paramter is not
+does not end up as a single, long line.  If the parameter is not
 present, the module will not insert the newlines.
 
 =item UNSAFE
