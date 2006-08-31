@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::Writer.
 
+0.600 Thu Jun 30 23:17:00 BST 2005    <joe@kafsemo.org>
+	- Don't include an encoding in the XML declaration unless one
+	   is specified.
+	- Check for, and croak on, invalid characters (including ASCII NUL).
+	- Fixed 'ancestor' with out-of-bounds indexes.
+
 0.545 Mon May 16 08:11:17 BST 2005    <joe@kafsemo.org>
 	- Format comments like elements when in data mode.
 	- Only attempt Unicode tests for Perl >= 5.8.1.
