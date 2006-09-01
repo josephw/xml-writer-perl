@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Writer.
 
+0.601 Fri Sep  1 15:01:45 BST 2006    <joe@kafsemo.org>
+        - Don't modify list references passed as tag or attribute names
+           (cpan #14854).
+
 0.600 Thu Jun 30 23:17:00 BST 2005    <joe@kafsemo.org>
         - Don't include an encoding in the XML declaration unless one
            is specified.
