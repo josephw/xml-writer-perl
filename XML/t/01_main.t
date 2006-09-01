@@ -2,7 +2,7 @@
 ########################################################################
 # test.pl - test script for XML::Writer module.
 # Copyright (c) 1999 by Megginson Technologies.
-# Copyright (c) 2004, 2005 by Joseph Walton <joe@kafsemo.org>.
+# Copyright (c) 2004 - 2006 by Joseph Walton <joe@kafsemo.org>.
 # No warranty.  Commercial and non-commercial use freely permitted.
 #
 # $Id$
@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 210);
+use Test::More(tests => 213);
 
 
 # Catch warnings
@@ -1750,6 +1750,22 @@ TEST: {
 
 	checkResult(<<"EOR", 'An array passed by reference should not be modified');
 <prefix:elem xmlns:prefix="uri:test"><prefix:elem /></prefix:elem>
+EOR
+}
+
+# As per #14854, list references should also work for attribute names
+TEST: {
+	my $t = ['uri:test', 'elem'];
+
+	initEnv(PREFIX_MAP => {'uri:test' => 'prefix'});
+
+	$w->startTag('x', $t => '');
+	ok(eval {$w->emptyTag('y', $t => '');}, 'Passing an array twice should not cause failure');
+	$w->endTag('x');
+	$w->end();
+
+	checkResult(<<"EOR", 'An array passed by reference should not be modified');
+<x prefix:elem="" xmlns:prefix="uri:test"><y prefix:elem="" /></x>
 EOR
 }
 

@@ -921,12 +921,16 @@ sub new {
   #
   my $nsProcess = sub {
     if (ref($_[0]->[0]) eq 'ARRAY') {
-      &{$processName}(\$_[0]->[0], $_[0], 0);
+      my $x = \@{$_[0]->[0]};
+      &{$processName}(\$x, $_[0], 0);
+      splice(@{$_[0]}, 0, 1, $x);
     }
     my $i = 1;
     while ($_[0]->[$i]) {
       if (ref($_[0]->[$i]) eq 'ARRAY') {
-        &{$processName}(\$_[0]->[$i], $_[0], 1);
+        my $x = \@{$_[0]->[$i]};
+        &{$processName}(\$x, $_[0], 1);
+        splice(@{$_[0]}, $i, 1, $x);
       }
       $i += 2;
     }
