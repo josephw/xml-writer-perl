@@ -1692,7 +1692,9 @@ EOR
 }
 
 # Cover XML declaration encoding cases
-TEST: {
+SKIP: {
+	skip $unicodeSkipMessage, 8 unless isUnicodeSupported();
+
 	# No declaration unless specified
 	initEnv();
 	$w->xmlDecl();
