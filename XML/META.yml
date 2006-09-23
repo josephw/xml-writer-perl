@@ -1,10 +1,11 @@
-# http://module-build.sourceforge.net/META-spec-new.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-meta-spec:    1.1
+--- #YAML:1.0
+meta-spec:
+  version: 1.2
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
 name:         XML-Writer
 version:      0.601
 abstract:     Easily generate well-formed, namespace-aware XML.
-authored_by:
+author:
   - David Megginson <david@megginson.com>
   - Ed Avis <ed@membled.com>
   - Joseph Walton <joe@kafsemo.org>
