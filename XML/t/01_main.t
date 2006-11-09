@@ -1383,6 +1383,7 @@ EOR
 
 # Capture generated XML in a scalar
 TEST: {
+	initEnv();
 	my $s;
 
 	$w = new XML::Writer(OUTPUT => \$s);
@@ -1395,6 +1396,7 @@ TEST: {
 
 # Modify the scalar during capture
 TEST: {
+	initEnv();
 	my $s;
 
 	$w = new XML::Writer(OUTPUT => \$s);
@@ -1411,6 +1413,7 @@ TEST: {
 
 # Ensure that ENCODING and SCALAR don't cause failure when used together
 TEST: {
+	initEnv();
 	my $s;
 
 	ok(eval {$w = new XML::Writer(OUTPUT => \$s,
@@ -1429,6 +1432,7 @@ TEST: {
 SKIP: {
 	skip $unicodeSkipMessage, 2 unless isUnicodeSupported();
 
+	initEnv();
 	my $s;
 
 	$w = new XML::Writer(OUTPUT => \$s);
