@@ -1360,7 +1360,13 @@ SKIP: {
 	$w->comment("\$ \x{A3} \x{20AC}");
 	$w->startTag('a');
 	$w->dataElement('b', '$');
-	$w->dataElement('b', "\x{A3}");
+
+	# I need U+00A3 as an is_utf8 string; I want to keep the source ASCII.
+	# There must be a better way to do this.
+	require Encode;
+	my $x = Encode::decode('iso-8859-1', "\x{A3}");
+	$w->dataElement('b', $x);
+
 	$w->dataElement('b', "\x{20AC}");
 	$w->startTag('c');
 	$w->cdata(" \$ \x{A3} \x{20AC} ");
