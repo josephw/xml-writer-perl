@@ -1364,8 +1364,8 @@ SKIP: {
 	# I need U+00A3 as an is_utf8 string; I want to keep the source ASCII.
 	# There must be a better way to do this.
 	require Encode;
-	my $x = Encode::decode('iso-8859-1', "\x{A3}");
-	$w->dataElement('b', $x);
+	my $text = Encode::decode('iso-8859-1', "\x{A3}");
+	$w->dataElement('b', $text);
 
 	$w->dataElement('b', "\x{20AC}");
 	$w->startTag('c');
@@ -1492,8 +1492,11 @@ EOR
 
 	# Make sure non-ASCII characters that can't be represented
 	#  as references cause failure
-	my $text = "\x{A3}";
-#	utf8::upgrade($text);
+
+	# I need U+00A3 as an is_utf8 string; I want to keep the source ASCII.
+	# There must be a better way to do this.
+	require Encode;
+	my $text = Encode::decode('iso-8859-1', "\x{A3}");
 
 	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
 	$w->startTag('a');
