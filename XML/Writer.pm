@@ -1,4 +1,4 @@
-########################################################################
+#######################################################################
 # Writer.pm - write an XML document.
 # Copyright (c) 1999 by Megginson Technologies.
 # Copyright (c) 2004, 2005 by Joseph Walton <joe@kafsemo.org>.
@@ -466,9 +466,9 @@ sub new {
       $output = $newOutput || \*STDOUT;
       if ($outputEncoding) {
         if (lc($outputEncoding) eq 'utf-8') {
-          binmode($output, ':encoding(utf-8)');
+          binmode($output, ':encoding(utf-8)') if $] >= 5.006;
         } elsif (lc($outputEncoding) eq 'us-ascii') {
-          binmode($output, ':encoding(us-ascii)');
+          binmode($output, ':encoding(us-ascii)') if $] >= 5.006;
         } else {
           die 'The only supported encodings are utf-8 and us-ascii';
         }

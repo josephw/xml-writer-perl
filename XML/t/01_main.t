@@ -42,7 +42,12 @@ sub isUnicodeSupported()
 
 require XML::Writer;
 
-wasNoWarning('Loading XML::Writer should not result in warnings');
+SKIP: {
+	skip "Perls before 5.6 always warn when loading XML::Writer", 1 if $] <= 
+	5.006;
+
+	wasNoWarning('Loading XML::Writer should not result in warnings');
+}
 
 use IO::File;
 
@@ -68,7 +73,7 @@ sub initEnv(@)
 	# Reset the scratch file
 	$outputFile->seek(0, 0);
 	$outputFile->truncate(0);
-	binmode($outputFile, ':raw');
+	binmode($outputFile, ':raw') if $] >= 5.006;
 
 	# Overwrite OUTPUT so it goes to the scratch file
 	$args{'OUTPUT'} = $outputFile;
@@ -721,7 +726,7 @@ TEST: {
 	$w->emptyTag('elem', ['http://www.w3.org/XML/1998/namespace', 'space'] => 'preserve');
 	$w->end();
 
-	if (!unlike(getBufStr(), qr/1998/, "No declaration should be generated for the 'xml:' prefix"))
+	if (!unlike(getBufStr(), '/1998/', "No declaration should be generated for the 'xml:' prefix"))
 	{
 		diag(getBufStr());
 	}
@@ -742,7 +747,7 @@ TEST: {
 	$w->endTag('doc');
 	$w->end();
 
-	if (!unlike(getBufStr(), qr/uri:test.*uri:test/, 'An API should allow forced namespace declarations'))
+	if (!unlike(getBufStr(), '/uri:test.*uri:test/', 'An API should allow forced namespace declarations'))
 	{
 		diag(getBufStr());
 	}
