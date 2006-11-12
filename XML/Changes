@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::Writer.
 
+0.602 Sat Nov 11 16:54:22 GMT 2006    <joe@kafsemo.org>
+        - Fix bugs in test case to avoid breaking with new Perls.
+        - Make test case work with older Perls, tested against 5.004 (#17288).
+        - Include pod syntax and coverage tests.
+
 0.601 Fri Sep  1 15:01:45 BST 2006    <joe@kafsemo.org>
         - Don't modify list references passed as tag or attribute names
            (cpan #14854).
