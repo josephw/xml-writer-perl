@@ -90,6 +90,8 @@ sub new {
       my $aname = $atts->[$i++];
       my $value = _escapeLiteral($atts->[$i++]);
       $value =~ s/\x0a/\&#10\;/g;
+      $value =~ s/\x0d/\&#13\;/g;
+      $value =~ s/\x09/\&#9\;/g;
       &{$escapeEncoding}($value);
       $output->print(" $aname=\"$value\"");
     }
