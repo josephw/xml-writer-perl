@@ -1,7 +1,7 @@
 Revision history for Perl extension XML::Writer.
 
 0.603 Mon Jun 25 22:31:40 BST 2007    <joe@kafsemo.org>
-        - Escape all white space in attributes (#25499).
+        - Escape all necessary white space in attributes (#25499).
 
 0.602 Sat Nov 11 16:54:22 GMT 2006    <joe@kafsemo.org>
         - Fix bugs in test case to avoid breaking with new Perls.
