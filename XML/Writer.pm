@@ -58,7 +58,7 @@ sub new {
     $nl = "\n";
   }
 
-  my $outputEncoding = $params{ENCODING};
+  my $outputEncoding = $params{ENCODING} || "";
   my ($checkUnencodedRepertoire, $escapeEncoding);
   if (lc($outputEncoding) eq 'us-ascii') {
     $checkUnencodedRepertoire = \&_croakUnlessASCII;
