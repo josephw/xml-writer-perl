@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Writer.
 
+0.604 Thu Feb 21 00:42:06 GMT 2008    <joe@kafsemo.org>
+        - Patch from Andreas Koenig for lc(undef) warning in 5.11 (#32874).
+        - Include example code.
+
 0.603 Mon Jun 25 22:31:40 BST 2007    <joe@kafsemo.org>
         - Escape all necessary white space in attributes (#25499).
 
