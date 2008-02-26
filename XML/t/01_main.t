@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 217);
+use Test::More(tests => 218);
 
 
 # Catch warnings
@@ -447,6 +447,14 @@ TEST: {
 	$w->startTag('bar');
 	ok($w->within_element('foo') && $w->within_element('bar'),
 		'within_element should know about all elements above us');
+};
+
+# within_element returning false
+TEST: {
+	initEnv();
+	$w->startTag('foo');
+	ok(!$w->within_element('bar'),
+		'within_element should return false for non-parent elements');
 };
 
 # current_element query
