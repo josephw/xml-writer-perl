@@ -1,7 +1,7 @@
 --- #YAML:1.0
 meta-spec:
   version: 1.2
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  url: http://module-build.sourceforge.net/META-spec-v1.3.html
 name:         XML-Writer
 version:      0.604
 abstract:     Easily generate well-formed, namespace-aware XML.
