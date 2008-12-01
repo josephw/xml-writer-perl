@@ -575,8 +575,8 @@ sub endTag {
 # Write a simple data element.
 #
 sub dataElement {
-  my ($self, $name, $data, %atts) = (@_);
-  $self->startTag($name, %atts);
+  my ($self, $name, $data, @atts) = (@_);
+  $self->startTag($name, @atts);
   $self->characters($data);
   $self->endTag($name);
 }
