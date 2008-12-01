@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::Writer.
 
+0.605 Mon Dec  1 23:01:21 GMT 2008    <joe@kafsemo.org>
+        - Use MIT license, formalising David Megginson's original
+           ("No warranty. Commercial and non-commercial use freely
+           permitted.").
+        - Fix from Yanick Champoux for dataElements namespaces (#41359).
+
 0.604 Thu Feb 21 00:42:06 GMT 2008    <joe@kafsemo.org>
         - Patch from Andreas Koenig for lc(undef) warning in 5.11 (#32874).
         - Include example code.
