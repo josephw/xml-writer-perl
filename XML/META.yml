@@ -15,6 +15,7 @@ installdirs:  site
 
 build_requires:
   perl: 5.006_000
+  Test::More: 0.047
 recommends:
   perl: 5.008_001
 
