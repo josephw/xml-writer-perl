@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 218);
+use Test::More(tests => 220);
 
 
 # Catch warnings
@@ -1817,6 +1817,19 @@ TEST: {
 	checkResult("<x a=\"]]&gt;\" />\n", "]]> must be escaped in attributes");
 };
 
+# #41359 - ensure dataElement expands namespace attributes
+TEST: {
+	initEnv();
+
+	my $ns = 'http://foo';
+	$w->addPrefix($ns => 'foo');
+	$w->startTag('doc');
+	$w->dataElement( [$ns, 'bar'], 'yadah', [$ns, 'baz'] => 'x' );
+	$w->endTag('doc');
+
+	checkResult('<doc><foo:bar foo:baz="x" xmlns:foo="http://foo">yadah</foo:bar></doc>',
+		"A dataElement call must expand namespace attributes");
+};
 
 # Free test resources
 $outputFile->close() or die "Unable to close temporary file: $!";
