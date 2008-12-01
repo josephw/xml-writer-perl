@@ -1823,6 +1823,7 @@ TEST: {
 
 	my $ns = 'http://foo';
 	$w->addPrefix($ns => 'foo');
+
 	$w->startTag('doc');
 	$w->dataElement( [$ns, 'bar'], 'yadah', [$ns, 'baz'] => 'x' );
 	$w->endTag('doc');
