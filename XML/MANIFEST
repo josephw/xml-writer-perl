@@ -15,3 +15,4 @@ examples/xml-writer-string.pl
 examples/data-mode-sample.pl
 examples/writing-unicode.pl
 examples/directory-as-atom.pl
+LICENSE
