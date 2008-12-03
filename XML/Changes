@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::Writer.
 
+0.606 Wed Dec  3 00:09:34 GMT 2008    <joe@kafsemo.org>
+        - Ensure META.yml spec version matches URL.
+
 0.605 Mon Dec  1 23:01:21 GMT 2008    <joe@kafsemo.org>
         - Use MIT license, formalising David Megginson's original
            ("No warranty. Commercial and non-commercial use freely
