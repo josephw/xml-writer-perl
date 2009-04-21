@@ -13,7 +13,7 @@
 
 use strict;
 
-use Test::More(tests => 220);
+use Test::More(tests => 221);
 
 
 # Catch warnings
@@ -1830,6 +1830,16 @@ TEST: {
 
 	checkResult('<doc><foo:bar foo:baz="x" xmlns:foo="http://foo">yadah</foo:bar></doc>',
 		"A dataElement call must expand namespace attributes");
+};
+
+# Confirm that vertical spaces are not permitted in XML 1.0 (rejecting #45194)
+TEST: {
+	initEnv();
+
+	$w->startTag('test');
+	expectError('\u000B is not a valid character in XML', eval {
+		$w->characters(chr(11)); # Vertical tab
+	});
 };
 
 # Free test resources
