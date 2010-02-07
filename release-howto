@@ -1,0 +1,33 @@
+To Release
+----------
+
+(Notes.)
+
+Commit all changes.
+
+Run tests:
+PERL5LIB=. perl XML/t/01_main.t
+
+Bump version in:
+	Writer.pm
+	Makefile.PL
+	META.yml
+
+Update changelog.
+
+svn commit XML
+
+svn mkdir tags/release-A_BCD
+svn cp trunk/XML tags/release-A_BCD/
+
+Locally,
+
+svn export tags/release-A_BCD /tmp/xml-writer-release
+
+perl Makefile.PL
+make dist
+
+Upload to Berlios, CPAN.
+
+Update web page:
+./gen-index.pl >generated-index.html && scp generated-index.html shell.berlios.de:/home/groups/xml-writer-perl/htdocs/index.html
