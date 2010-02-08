@@ -15,14 +15,17 @@ Bump version in:
 
 Update changelog.
 
-svn commit XML
+git commit -a
 
-svn mkdir tags/release-A_BCD
-svn cp trunk/XML tags/release-A_BCD/
+git tag xml-writer-A.BCD
+
+git push origin master xml-writer-A.BCD
 
 Locally,
 
-svn export tags/release-A_BCD /tmp/xml-writer-release
+mkdir /tmp/xml-writer-release
+git archive xml-writer-A.BCD | tar -x -C /tmp/xml-writer-release
+cd /tmp/xml-writer-release/XML
 
 perl Makefile.PL
 make dist
