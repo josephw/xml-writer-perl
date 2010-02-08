@@ -39,30 +39,13 @@ $changes->close() or die "Unable to close Changes: $!";
 
 print STDERR "Latest version: $latest\n";
 
-my $rtag = "release-$latest";
-$rtag =~ s/\./_/g;
+my $rtag = "xml-writer-$latest";
 
-open(STATUS, '-|', 'svn info XML/Writer.pm') or die "Unable to get SVN info: $!";
+print STDERR "Tag: $rtag\n";
 
-my $revision;
+my $baseTag = 'xml-writer-0.4';
 
-while (<STATUS>) {
-	chomp;
-
-	if (my ($r) = /^Last Changed Rev: (\d+)$/) {
-		$revision = $r;
-	}
-}
-
-close(STATUS) or die "Unable to close CVS status: $!";
-
-die "Unable to find current SVN revision" unless $revision;
-
-print STDERR "Revision: $revision\n";
-
-my $baseRevision = 27; # xml-writer_0_4
-
-my $diffUrl = encode_entities('http://svn.berlios.de/viewcvs/xml-writer-perl/trunk/XML/Writer.pm?r1='.$baseRevision.'&r2='.$revision);
+my $diffUrl = encode_entities('http://git.berlios.de/cgi-bin/cgit.cgi/xml-writer-perl/diff/XML/Writer.pm?id2='.$baseTag.'&id='.$rtag.'&ss=1');
 
 while (<$index>) {
 	if (/<!-- CHANGELOG -->/) {
