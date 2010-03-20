@@ -16,9 +16,6 @@ Here is an example:
 
 If necessary, error-checking can be turned off for production use.
 
-This release bumps the version number so the changes in the 0.4.x releases
-can automatically be picked up by CPAN users.
-
 See the Changes file for detailed changes between versions.
 
 Copyright (c) 1999 by David Megginson,
@@ -27,6 +24,3 @@ Some fixes, and a rewritten test suite,
 copyright 2004, 2005 Joseph Walton <joe@kafsemo.org>
 
 Current development is hosted at <http://xml-writer-perl.berlios.de/>.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.

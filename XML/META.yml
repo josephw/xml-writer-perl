@@ -9,7 +9,7 @@ author:
   - David Megginson <david@megginson.com>
   - Ed Avis <ed@membled.com>
   - Joseph Walton <joe@kafsemo.org>
-license:      mit
+license:      unrestricted
 distribution_type: module
 installdirs:  site
 
