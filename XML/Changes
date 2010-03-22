@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::Writer.
 
+0.607 Mon Mar 22 14:46:26 GMT 2010    <joe@kafsemo.org>
+        - Address license confusion by reverting to the original
+           license, with contributor permission, and removing
+           unintentional references to the (more restrictive)
+           GPL/Artistic.
+
 0.606 Wed Dec  3 00:09:34 GMT 2008    <joe@kafsemo.org>
         - Ensure META.yml spec version matches URL.
 
