@@ -13,7 +13,9 @@
 
 use strict;
 
-use Test::More(tests => 221);
+use Errno;
+
+use Test::More(tests => 223);
 
 
 # Catch warnings
@@ -76,7 +78,7 @@ sub initEnv(@)
 	binmode($outputFile, ':raw') if $] >= 5.006;
 
 	# Overwrite OUTPUT so it goes to the scratch file
-	$args{'OUTPUT'} = $outputFile;
+	$args{'OUTPUT'} = $outputFile unless(defined($args{'OUTPUT'}));
 
 	# Set NAMESPACES, unless it's present
 	$args{'NAMESPACES'} = 1 unless(defined($args{'NAMESPACES'}));
@@ -1842,9 +1844,58 @@ TEST: {
 	});
 };
 
+# Get the string for our test error
+$! = Errno::ENOSPC;
+my $enospcMessage = $!;
+
+# A failing underlying write is caught when the CHECK_PRINT flag is set
+TEST: {
+	my $failingWriter = XML::Writer::Test::FailingWriter->new();
+
+	initEnv(OUTPUT => $failingWriter, CHECK_PRINT => 1);
+	expectError("Failed to write output: $enospcMessage", eval {
+		$w->xmlDecl();
+	});
+};
+
+# Changing the underlying target to a failing one makes the next write fail
+TEST: {
+	my $failingWriter = XML::Writer::Test::FailingWriter->new();
+
+	initEnv(CHECK_PRINT => 1);
+	$w->xmlDecl();
+	$w->setOutput($failingWriter);
+	expectError("Failed to write output: $enospcMessage", eval {
+		$w->startTag('x');
+	});
+};
+
+# A failing underlying write is ignored when the CHECK_PRINT flag is not set
+TEST: {
+	my $failingWriter = XML::Writer::Test::FailingWriter->new();
+
+	initEnv(OUTPUT => $failingWriter);
+	$w->xmlDecl();
+};
+
 # Free test resources
 $outputFile->close() or die "Unable to close temporary file: $!";
 
 1;
+
+
+package XML::Writer::Test::FailingWriter;
+
+sub new
+{
+  my $class = shift;
+  return bless({}, $class);
+}
+
+sub print
+{
+  $! = Errno::ENOSPC;
+  return 0;
+}
 
 __END__

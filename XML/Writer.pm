@@ -454,7 +454,11 @@ sub new {
 
                                 # Set and get the output destination.
   $self->{'GETOUTPUT'} = sub {
-    return $output;
+    if (ref($output) ne 'XML::Writer::_PrintChecker') {
+      return $output;
+    } else {
+      return $output->{HANDLE};
+    }
   };
 
   $self->{'SETOUTPUT'} = sub {
@@ -475,6 +479,10 @@ sub new {
           die 'The only supported encodings are utf-8 and us-ascii';
         }
       }
+    }
+
+    if ($params{CHECK_PRINT}) {
+      $output = XML::Writer::_PrintChecker->new($output);
     }
   };
 
@@ -1140,6 +1148,27 @@ sub print
 {
   ${(shift)} .= join('', @_);
   return 1;
+}
+
+
+package XML::Writer::_PrintChecker;
+
+use Carp;
+
+sub new
+{
+  my $class = shift;
+  return bless({HANDLE => shift}, $class);
+}
+
+sub print
+{
+  my $self = shift;
+  if ($self->{HANDLE}->print(shift)) {
+    return 1;
+  } else {
+    croak "Failed to write output: $!";
+  }
 }
 
 1;
