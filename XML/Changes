@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Writer.
 
+0.610 Mon Mar 29 02:29:32 BST 2010    <joe@kafsemo.org>
+        - Add a CHECK_PRINT constructor parameter to check the output print
+           success (#50465). It will croak when printing to output fails.
+
 0.607 Mon Mar 22 14:46:26 GMT 2010    <joe@kafsemo.org>
         - Address license confusion by reverting to the original
            license, with contributor permission, and removing

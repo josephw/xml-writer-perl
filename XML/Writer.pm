@@ -14,7 +14,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 use IO::Handle;
-$VERSION = "0.607";
+$VERSION = "0.610";
 
 
 
@@ -1325,8 +1325,8 @@ default in the XML declaration.
 =item CHECK_PRINT
 
 A true or false value; if this parameter is present and its value is
-true, all prints to the underlying output will be checked for success. Errors
-will cause a croak.
+true, all prints to the underlying output will be checked for success. Failures
+will cause a croak rather than being ignored.
 
 =back
 
