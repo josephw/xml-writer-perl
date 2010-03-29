@@ -1322,6 +1322,12 @@ A character encoding; currently this must be one of 'utf-8' or 'us-ascii'.
 If present, it will be used for the underlying character encoding and as the
 default in the XML declaration.
 
+=item CHECK_PRINT
+
+A true or false value; if this parameter is present and its value is
+true, all prints to the underlying output will be checked for success. Errors
+will cause a croak.
+
 =back
 
 =item end()
