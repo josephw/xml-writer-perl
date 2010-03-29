@@ -2,10 +2,9 @@
 ########################################################################
 # test.pl - test script for XML::Writer module.
 # Copyright (c) 1999 by Megginson Technologies.
-# Copyright (c) 2004 - 2006 by Joseph Walton <joe@kafsemo.org>.
+# Copyright (c) 2003 Ed Avis <ed@membled.com>
+# Copyright (c) 2004-2010 Joseph Walton <joe@kafsemo.org>
 # No warranty.  Commercial and non-commercial use freely permitted.
-#
-# $Id$
 ########################################################################
 
 # Before 'make install' is performed this script should be runnable with

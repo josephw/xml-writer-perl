@@ -1,10 +1,9 @@
 ########################################################################
 # Writer.pm - write an XML document.
 # Copyright (c) 1999 by Megginson Technologies.
-# Copyright (c) 2004, 2005 by Joseph Walton <joe@kafsemo.org>.
+# Copyright (c) 2003 Ed Avis <ed@membled.com>
+# Copyright (c) 2004-2010 Joseph Walton <joe@kafsemo.org>
 # No warranty.  Commercial and non-commercial use freely permitted.
-#
-# $Id$
 ########################################################################
 
 package XML::Writer;
@@ -1649,9 +1648,7 @@ Copyright 1999, 2000 David Megginson E<lt>david@megginson.comE<gt>
 
 Copyright 2004, 2005 Joseph Walton E<lt>joe@kafsemo.orgE<gt>
 
-This module is free software; you can redistribute it and/or
-modify it under the terms of the MIT License. See the F<LICENSE> file
-included with this distribution.
+No warranty.  Commercial and non-commercial use freely permitted.
 
 =head1 SEE ALSO
 
