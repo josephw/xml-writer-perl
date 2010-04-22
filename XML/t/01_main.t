@@ -4,7 +4,8 @@
 # Copyright (c) 1999 by Megginson Technologies.
 # Copyright (c) 2003 Ed Avis <ed@membled.com>
 # Copyright (c) 2004-2010 Joseph Walton <joe@kafsemo.org>
-# No warranty.  Commercial and non-commercial use freely permitted.
+# Redistribution and use in source and compiled forms, with or without
+# modification, are permitted under any circumstances.  No warranty.
 ########################################################################
 
 # Before 'make install' is performed this script should be runnable with
