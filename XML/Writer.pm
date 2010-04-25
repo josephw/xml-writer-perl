@@ -1651,11 +1651,14 @@ David Megginson E<lt>david@megginson.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000 David Megginson E<lt>david@megginson.comE<gt>
+Copyright (c) 1999 by Megginson Technologies.
 
-Copyright 2004, 2005 Joseph Walton E<lt>joe@kafsemo.orgE<gt>
+Copyright (c) 2003 Ed Avis E<lt>ed@membled.comE<gt>
 
-No warranty.  Commercial and non-commercial use freely permitted.
+Copyright (c) 2004-2010 Joseph Walton E<lt>joe@kafsemo.orgE<gt>
+
+Redistribution and use in source and compiled forms, with or without
+modification, are permitted under any circumstances.  No warranty.
 
 =head1 SEE ALSO
 
