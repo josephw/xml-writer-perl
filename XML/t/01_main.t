@@ -15,7 +15,7 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 225);
+use Test::More(tests => 236);
 
 
 # Catch warnings
@@ -1889,6 +1889,89 @@ TEST: {
 
 	$w->setOutput($out);
 	is ($w->getOutput(), $out, 'Changing output back should succeed');
+};
+
+# Test changing numeric indentation
+TEST: {
+	initEnv();
+
+	is($w->getDataIndent(), 0, 'Indent should default to zero');
+
+	$w->setDataIndent(1);
+	is($w->getDataIndent(), 1, 'Indent should be as set');
+
+};
+
+# Generate a document with an indent of more than one
+TEST: {
+	initEnv(
+		DATA_MODE => 1,
+		DATA_INDENT => 2
+	);
+
+	$w->xmlDecl();
+	$w->startTag('doc');
+	$w->emptyTag('item');
+	$w->endTag('doc');
+	$w->end();
+	checkResult(<<"EOS", "Numeric indent should indicate the number of spaces");
+<?xml version="1.0"?>
+
+<doc>
+  <item />
+</doc>
+EOS
+};
+
+# Test getting and setting indentation as a whitespace string
+TEST: {
+	initEnv();
+
+	is($w->getDataIndent(), 0, 'Indent should be returned as the number of spaces');
+
+	$w->setDataIndent(' ');
+	is($w->getDataIndent(), 1, 'Indent should be returned as the number of spaces');
+
+	$w->setDataIndent('  ');
+	is($w->getDataIndent(), 2, 'Indent should be returned as the number of spaces');
+
+	$w->setDataIndent("\t");
+	is($w->getDataIndent(), "\t", 'Indent should be returned as a string when given as non-space whitespace');
+};
+
+# Generate a document with whitespace string indentation
+TEST: {
+	initEnv(
+		DATA_MODE => 1,
+		DATA_INDENT => '' 
+	);
+
+	$w->xmlDecl();
+	$w->startTag('doc');
+	$w->emptyTag('item');
+	$w->setDataIndent(' ');
+	$w->emptyTag('item');
+	$w->setDataIndent("\t");
+	$w->emptyTag('item');
+	$w->endTag('doc');
+	$w->end();
+	checkResult(<<"EOS", "Numeric indent should indicate the number of spaces");
+<?xml version="1.0"?>
+
+<doc>
+<item />
+ <item />
+\t<item />
+</doc>
+EOS
+};
+
+# A non-whitespace, non-numeric indent should fall back to 0
+TEST: {
+	initEnv();
+
+	$w->setDataIndent('x');
+	is($w->getDataIndent(), 0, 'Non-numeric indent should fall back to zero');
 };
 
 # Free test resources
