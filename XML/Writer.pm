@@ -50,6 +50,9 @@ sub new {
   my $newlines = $params{NEWLINES};
   my $dataMode = $params{DATA_MODE};
   my $dataIndent = $params{DATA_INDENT} || 0;
+  # begin by Klaus Eichner, 17 July 2010
+  my $mixedContent = $params{MIXED_CONTENT};
+  # end by Klaus Eichner, 17 July 2010
 
                                 # If the NEWLINES parameter is specified,
                                 # set the $nl variable appropriately
@@ -318,7 +321,11 @@ sub new {
     my $currentName = pop @elementStack;
     $name = $currentName unless $name;
     $elementLevel--;
-    if ($dataMode && $hasElement) {
+
+    # begin by Klaus Eichner, 17 July 2010
+    if ($dataMode && $hasElement
+    or  $dataMode && $mixedContent) {
+    # end by Klaus Eichner, 17 July 2010
       $output->print("\n");
       $output->print(" " x ($elementLevel * $dataIndent));
     }
@@ -349,6 +356,13 @@ sub new {
       $data =~ s/\>/\&gt\;/g;
     }
     &{$escapeEncoding}($data);
+    # begin by Klaus Eichner, 17 July 2010
+    if ($dataMode && $mixedContent) {
+        $output->print("\n");
+        $output->print(" " x ($elementLevel * $dataIndent));
+    }
+    # end by Klaus Eichner, 17 July 2010
+
     $output->print($data);
     $hasData = 1;
   };
