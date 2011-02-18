@@ -12,7 +12,7 @@ my $EXT = 'http://www.example.com/feed-extension';
 my $EXT2 = 'http://www.example.com/feed-extension-2';
 my $EXT3 = 'http://www.example.com/feed-extension-3';
 
-my $w = new XML::Writer(
+my $w = XML::Writer->new(
 	NAMESPACES => 1,
 	DATA_MODE => 1,
 

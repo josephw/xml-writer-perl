@@ -10,7 +10,7 @@ my $output;
 
 open($output, '>', 'output.xml') or die "Unable to open output file: $!";
 
-my $writer = new XML::Writer(OUTPUT => $output);
+my $writer = XML::Writer->new(OUTPUT => $output);
 $writer->startTag("greeting",
                   "class" => "simple");
 $writer->characters("Hello, world!");

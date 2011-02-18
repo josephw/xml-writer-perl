@@ -8,7 +8,7 @@ use XML::Writer;
 
 my $unicodeString = "\x{201C}This\x{201D} is a test - \$ \x{00A3} \x{20AC}";
 
-my $w = new XML::Writer(ENCODING => 'utf-8');
+my $w = XML::Writer->new(ENCODING => 'utf-8');
 
 $w->xmlDecl();
 

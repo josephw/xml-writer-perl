@@ -28,7 +28,7 @@ $subtitle ||= 'ls -ltr $dir | head -10';
 
 my $uid = (stat($dir))[4];
 
-my $dh = new DirHandle($dir) || die "Unable to opendir $dir: $!";
+my $dh = DirHandle->new($dir) || die "Unable to opendir $dir: $!";
 
 my @de;
 
@@ -74,7 +74,7 @@ sub toIsoDate($)
 	return $d->iso8601 . "Z";
 }
 
-my $w = new XML::Writer(
+my $w = XML::Writer->new(
 	# Use namespaces
 	NAMESPACES => 1,
 	
@@ -91,9 +91,9 @@ my $w = new XML::Writer(
 	ENCODING => 'utf-8'
 );
 
-$base = new URI::URL($base)->abs;
+$base = URI::URL->new($base)->abs;
 
-my $feedUrl = new URI::URL('index.atom', $base);
+my $feedUrl = URI::URL->new('index.atom', $base);
 
 $w->xmlDecl();
 

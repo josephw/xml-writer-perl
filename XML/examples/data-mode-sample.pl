@@ -7,7 +7,7 @@ use strict;
 use XML::Writer;
 use IO::File;
 
-my $writer = new XML::Writer(DATA_MODE => 1, DATA_INDENT => 2);
+my $writer = XML::Writer->new(DATA_MODE => 1, DATA_INDENT => 2);
 $writer->startTag("doc");
 $writer->startTag("x");
 $writer->dataElement("y", "Hello, world!");

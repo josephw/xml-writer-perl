@@ -9,7 +9,7 @@ use strict;
 
 use XML::Writer;
 
-my $w = new XML::Writer();
+my $w = XML::Writer->new();
 
 $w->startTag('doc');
 $w->characters('In HTML and XML, an ampersand must be escaped as &amp;');

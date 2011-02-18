@@ -84,7 +84,7 @@ sub initEnv(@)
 	$args{'NAMESPACES'} = 1 unless(defined($args{'NAMESPACES'}));
 
 	undef($warning);
-	$w = new XML::Writer(%args) || die "Cannot create XML writer";
+	$w = XML::Writer->new(%args) || die "Cannot create XML writer";
 }
 
 #
@@ -1407,7 +1407,7 @@ TEST: {
 	initEnv();
 	my $s;
 
-	$w = new XML::Writer(OUTPUT => \$s);
+	$w = XML::Writer->new(OUTPUT => \$s);
 	$w->emptyTag('x');
 	$w->end();
 
@@ -1420,7 +1420,7 @@ TEST: {
 	initEnv();
 	my $s;
 
-	$w = new XML::Writer(OUTPUT => \$s);
+	$w = XML::Writer->new(OUTPUT => \$s);
 	$w->startTag('foo', bar => 'baz');
 	is($s, "<foo bar=\"baz\">", 'Scalars should be up-to-date during writing');
 
@@ -1437,7 +1437,7 @@ TEST: {
 	initEnv();
 	my $s;
 
-	ok(eval {$w = new XML::Writer(OUTPUT => \$s,
+	ok(eval {$w = XML::Writer->new(OUTPUT => \$s,
 		ENCODING => 'utf-8'
 	);}, 'OUTPUT and ENCODING should not cause failure');
 }
@@ -1456,7 +1456,7 @@ SKIP: {
 	initEnv();
 	my $s;
 
-	$w = new XML::Writer(OUTPUT => \$s);
+	$w = XML::Writer->new(OUTPUT => \$s);
 
 	my $x = 'x';
 	utf8::upgrade($x);
@@ -1468,7 +1468,7 @@ SKIP: {
 
 
 	undef($s);
-	$w = new XML::Writer(OUTPUT => \$s);
+	$w = XML::Writer->new(OUTPUT => \$s);
 	$w->startTag('a');
 	$w->dataElement('x', "\$");
 	$w->dataElement('x', "\x{A3}");

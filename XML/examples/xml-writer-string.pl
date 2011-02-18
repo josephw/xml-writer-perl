@@ -8,7 +8,7 @@ use XML::Writer;
 
 my $s;
 
-my $w = new XML::Writer(OUTPUT => \$s);
+my $w = XML::Writer->new(OUTPUT => \$s);
 
 $w->startTag('doc');
 $w->characters('text');

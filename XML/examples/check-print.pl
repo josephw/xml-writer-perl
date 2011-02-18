@@ -17,7 +17,7 @@ my $writer;
 
 print "Writing without CHECK_PRINT will appear to succeed...\n";
 
-$writer = new XML::Writer(OUTPUT => $output);
+$writer = XML::Writer->new(OUTPUT => $output);
 $writer->emptyTag('document');
 $writer->end();
 
@@ -26,7 +26,7 @@ print "...no errors.\n";
 
 print "With CHECK_PRINT the write failure causes a croak...\n";
 
-$writer = new XML::Writer(OUTPUT => $output, CHECK_PRINT => 1);
+$writer = XML::Writer->new(OUTPUT => $output, CHECK_PRINT => 1);
 $writer->emptyTag('document');
 $writer->end();
 
