@@ -470,7 +470,7 @@ sub new {
                                 # If there is no OUTPUT parameter,
                                 # use standard output
       $output = $newOutput || \*STDOUT;
-      if ($outputEncoding) {
+      if ($outputEncoding && ref($output) && $output->isa('IO::Handle')) {
         if (lc($outputEncoding) eq 'utf-8') {
           binmode($output, ':encoding(utf-8)');
         } elsif (lc($outputEncoding) eq 'us-ascii') {
@@ -1249,11 +1249,11 @@ Arguments are an anonymous hash array of parameters:
 
 =item OUTPUT
 
-An object blessed into IO::Handle or one of its subclasses (such as
-IO::File), or a reference to a string; if this parameter is not present,
-the module will write to standard output. If a string reference is passed,
-it will capture the generated XML (as a string; to get bytes use the
-C<Encode> module).
+An object blessed into IO::Handle or one of its subclasses (such as IO::File),
+or a reference to a string, or any blessed object that has a print() method;
+if this parameter is not present, the module will write to standard output. If
+a string reference is passed, it will capture the generated XML (as a string;
+to get bytes use the C<Encode> module).
 
 =item NAMESPACES
 

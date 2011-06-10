@@ -15,8 +15,12 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 236);
+use Test::More(tests => 238);
+use Encode;
 
+
+# part of the Duck-Typing Output test.
+our $duckoutput;
 
 # Catch warnings
 my $warning;
@@ -1974,10 +1978,72 @@ TEST: {
 	is($w->getDataIndent(), 0, 'Non-numeric indent should fall back to zero');
 };
 
+
+TEST: {
+	my $output = bless [],'DuckOutput';
+	initEnv(
+		OUTPUT=>$output,
+		ENCODING=>'UTF-8'
+	);
+	$w->xmlDecl();
+
+	is($duckoutput,qq{<?xml version="1.0" encoding="UTF-8"?>\n},"Basic Duck Typing output");
+};
+
+SKIP: {
+	skip $unicodeSkipMessage, 1 unless isUnicodeSupported();
+	$duckoutput= '';
+	my $output = bless [],'DuckOutput';
+	initEnv(
+		OUTPUT=>$output,
+		ENCODING=>'utf-8',
+		DATA_MODE=>1,
+	);
+
+	$w->xmlDecl();
+	$w->comment("\$ \x{A3} \x{20AC}");
+	$w->startTag('a');
+	$w->dataElement('b', '$');
+
+	# I need U+00A3 as an is_utf8 string; I want to keep the source ASCII.
+	# There must be a better way to do this.
+	require Encode;
+	my $text = Encode::decode('iso-8859-1', "\x{A3}");
+	$w->dataElement('b', $text);
+
+	$w->dataElement('b', "\x{20AC}");
+	$w->startTag('c');
+	$w->cdata(" \$ \x{A3} \x{20AC} ");
+	$w->endTag('c');
+	$w->endTag('a');
+	$w->end();
+
+	is($duckoutput,decode('utf-8',<<EOR), 'When requested, output should be UTF-8 encoded, when using Duck Type output');
+<?xml version="1.0" encoding="utf-8"?>
+<!-- \$ \x{C2}\x{A3} \x{E2}\x{82}\x{AC} -->
+
+<a>
+<b>\x{24}</b>
+<b>\x{C2}\x{A3}</b>
+<b>\x{E2}\x{82}\x{AC}</b>
+<c><![CDATA[ \$ \x{C2}\x{A3} \x{E2}\x{82}\x{AC} ]]></c>
+</a>
+EOR
+
+
+}
+
+
+
 # Free test resources
 $outputFile->close() or die "Unable to close temporary file: $!";
 
 1;
+
+
+package DuckOutput;
+
+sub print { shift; $duckoutput.=join('', @_); }
 
 
 package XML::Writer::Test::FailingWriter;
