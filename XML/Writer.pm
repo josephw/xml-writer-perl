@@ -168,7 +168,7 @@ sub new {
     $seen{ANYTHING} = 1;
     if (($name =~ /^xml/i) && ($name !~ /^xml-stylesheet$/i)) {
       carp("Processing instruction target begins with 'xml'");
-    } 
+    }
 
     if ($name =~ /\?\>/ || (defined($data) && $data =~ /\?\>/)) {
       croak("Processing instruction may not contain '?>'");
@@ -917,7 +917,7 @@ sub new {
         $nsCopyFlag = 1;
       }
       $uriMap->{''} = $uri;
-      
+
                                 # Is there a straight-forward prefix?
     } elsif ($prefix) {
       $$nameref = "$prefix:$local";
@@ -1201,7 +1201,7 @@ XML::Writer - Perl extension for writing XML documents.
   my $output = IO::File->new(">output.xml");
 
   my $writer = XML::Writer->new(OUTPUT => $output);
-  $writer->startTag("greeting", 
+  $writer->startTag("greeting",
                     "class" => "simple");
   $writer->characters("Hello, world!");
   $writer->endTag("greeting");

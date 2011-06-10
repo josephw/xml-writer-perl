@@ -49,7 +49,7 @@ sub isUnicodeSupported()
 require XML::Writer;
 
 SKIP: {
-	skip "Perls before 5.6 always warn when loading XML::Writer", 1 if $] <= 
+	skip "Perls before 5.6 always warn when loading XML::Writer", 1 if $] <=
 	5.006;
 
 	wasNoWarning('Loading XML::Writer should not result in warnings');
@@ -783,7 +783,7 @@ TEST: {
 	wasNoWarning('The test processing instructions should not cause warnings');
 };
 
-# Verify that a still-reserved processing instruction generates 
+# Verify that a still-reserved processing instruction generates
 # a warning.
 TEST: {
 	initEnv();
@@ -1947,7 +1947,7 @@ TEST: {
 TEST: {
 	initEnv(
 		DATA_MODE => 1,
-		DATA_INDENT => '' 
+		DATA_INDENT => ''
 	);
 
 	$w->xmlDecl();
