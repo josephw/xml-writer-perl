@@ -1,6 +1,9 @@
 To Release
 ----------
 
+Prerequisities:
+libdevel-cover-perl libtemplate-perl libtest-pod-coverage-perl libppi-html-perl
+
 (Notes.)
 
 Commit all changes.
@@ -17,28 +20,29 @@ Update changelog.
 
 git commit -a
 
-git tag -a xml-writer-A.BCD
+xwver=A.BCD
+git tag -s xml-writer-$xwver
 
-git push origin master xml-writer-A.BCD
+git push origin master xml-writer-$xwver
 
 Locally,
 
 # Create a distribution from the tag
 mkdir /tmp/xml-writer-release
-git archive xml-writer-A.BCD | tar -x -C /tmp/xml-writer-release
+git archive xml-writer-$xwver | tar -x -C /tmp/xml-writer-release
 cd /tmp/xml-writer-release
 
 perl Makefile.PL
 make dist
 
 # Generate coverage report for the new release
-tar -xf XML-Writer-A.BCD.tar.gz -C /tmp
-cd /tmp/XML-Writer-A.BCD
+tar -xf XML-Writer-$xwver.tar.gz -C /tmp
+cd /tmp/XML-Writer-$xwver
 perl Makefile.PL
 cover -test -report Html_basic -outputdir coverage
 rsync --archive --verbose --delete coverage shell.berlios.de:/home/groups/xml-writer-perl/htdocs/
 
-Upload to Berlios, CPAN.
+Upload to CPAN.
 
 Update web page:
 ./gen-index.pl >generated-index.html && scp generated-index.html shell.berlios.de:/home/groups/xml-writer-perl/htdocs/index.html
