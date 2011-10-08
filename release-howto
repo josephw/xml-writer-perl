@@ -45,4 +45,16 @@ rsync --archive --verbose --delete coverage shell.berlios.de:/home/groups/xml-wr
 Upload to CPAN.
 
 Update web page:
-./gen-index.pl >generated-index.html && scp generated-index.html shell.berlios.de:/home/groups/xml-writer-perl/htdocs/index.html
+./gen-index.pl >generated-index.html
+
+mkdir temp-website
+cp style.css temp-website/
+cp -pr /tmp/XML-Writer-$xwver/coverage temp-website/
+cp generated-index.html temp-website/index.html
+
+cd temp-website
+git init
+git add .
+git commit -m 'Generated website.'
+
+git push -f git@github.com:josephw/xml-writer-perl.git master:refs/heads/gh-pages
