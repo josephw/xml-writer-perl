@@ -4,8 +4,7 @@ use strict;
 
 # Process index.html, to include the current post-0.4 changelog
 
-# To publish:
-# ./gen-index.pl >generated-index.html && scp generated-index.html shell.berlios.de:/home/groups/xml-writer-perl/htdocs/index.html
+# ./gen-index.pl >generated-index.html
 
 use version;
 
@@ -58,7 +57,7 @@ print STDERR "Tag: $rtag\n";
 
 my $baseTag = 'xml-writer-0.4';
 
-my $diffUrl = encode_entities('http://git.berlios.de/cgi-bin/cgit.cgi/xml-writer-perl/diff/XML/Writer.pm?id2='.$baseTag.'&id='.$rtag.'&ss=1');
+my $diffUrl = encode_entities('https://github.com/josephw/xml-writer-perl/compare/'.$baseTag.'...'.$rtag.'#files_bucket');
 
 while (<$index>) {
 	if (/<!-- CHANGELOG -->/) {
