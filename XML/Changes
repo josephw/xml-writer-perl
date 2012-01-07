@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::Writer.
 
+0.613 Sat Jan  7 22:51:26 2012 +1100    <joe@kafsemo.org>
+        - Use 'Object->new()' syntax throughout (#65840).
+        - Support passing in any arbitrary object that has a print()
+           method (from Jason Rodrigues).
+
 0.612 Mon Aug 16 00:10:16 2010 +1000    <joe@kafsemo.org>
         - Allow DATA_INDENT to specify arbitrary white space for
            indentation. If it is numeric then use that many space

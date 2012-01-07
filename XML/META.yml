@@ -3,7 +3,7 @@ meta-spec:
   version: 1.4
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
 name:         XML-Writer
-version:      0.612
+version:      0.613
 abstract:     Easily generate well-formed, namespace-aware XML.
 author:
   - David Megginson <david@megginson.com>
