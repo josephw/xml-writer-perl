@@ -30,7 +30,7 @@ Locally,
 # Create a distribution from the tag
 mkdir /tmp/xml-writer-release
 git archive xml-writer-$xwver | tar -x -C /tmp/xml-writer-release
-cd /tmp/xml-writer-release
+cd /tmp/xml-writer-release/XML
 
 perl Makefile.PL
 make dist
@@ -40,7 +40,6 @@ tar -xf XML-Writer-$xwver.tar.gz -C /tmp
 cd /tmp/XML-Writer-$xwver
 perl Makefile.PL
 cover -test -report Html_basic -outputdir coverage
-rsync --archive --verbose --delete coverage shell.berlios.de:/home/groups/xml-writer-perl/htdocs/
 
 Upload to CPAN.
 
