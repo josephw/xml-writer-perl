@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::Writer.
 
+0.614 Mon Jan  9 00:24:10 2012 +1100    <joe@kafsemo.org>
+        - Fix regression in 0.613 and set encoding on GLOBs.
+
 0.613 Sat Jan  7 22:51:26 2012 +1100    <joe@kafsemo.org>
         - Use 'Object->new()' syntax throughout (#65840).
         - Support passing in any arbitrary object that has a print()
