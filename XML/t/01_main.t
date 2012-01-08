@@ -15,7 +15,7 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 238);
+use Test::More(tests => 239);
 
 
 # Catch warnings
@@ -1974,7 +1974,6 @@ TEST: {
 	is($w->getDataIndent(), 0, 'Non-numeric indent should fall back to zero');
 };
 
-
 TEST: {
 	my $output;
 	bless \$output, 'DuckOutput';
@@ -1987,6 +1986,16 @@ TEST: {
 
 	$w->xmlDecl();
 	is($output, qq{<?xml version="1.0" encoding="UTF-8"?>\n}, "Basic Duck Typing output");
+};
+
+# We should try to set the encoding on GLOBs as well as IO::Handles
+TEST: {
+	skip $unicodeSkipMessage, 1 unless isUnicodeSupported();
+
+	expectError('encoding', eval {
+		initEnv(OUTPUT => \*STDOUT,
+			ENCODING => 'x-unsupported-encoding');
+	});
 };
 
 # Free test resources
