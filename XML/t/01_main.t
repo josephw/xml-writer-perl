@@ -1989,7 +1989,7 @@ TEST: {
 };
 
 # We should try to set the encoding on GLOBs as well as IO::Handles
-TEST: {
+SKIP: {
 	skip $unicodeSkipMessage, 1 unless isUnicodeSupported();
 
 	expectError('encoding', eval {
