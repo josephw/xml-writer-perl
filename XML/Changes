@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::Writer.
 
+0.615 Tue Jan 17 01:32:07 2012 +1100    <joe@kafsemo.org>
+        - Fix test skipping when Unicode is unsupported.
+
 0.614 Mon Jan  9 00:24:10 2012 +1100    <joe@kafsemo.org>
         - Fix regression in 0.613 and set encoding on GLOBs.
 
