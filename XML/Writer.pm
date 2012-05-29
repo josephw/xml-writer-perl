@@ -1331,9 +1331,12 @@ indentation.
 
 =item ENCODING
 
-A character encoding; currently this must be one of 'utf-8' or 'us-ascii'.
+A character encoding to use for the output; currently this must be one of
+'utf-8' or 'us-ascii'.
 If present, it will be used for the underlying character encoding and as the
 default in the XML declaration.
+All character data should be passed as Unicode strings when an encoding is
+set.
 
 =item CHECK_PRINT
 
