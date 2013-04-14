@@ -7,6 +7,7 @@ Writer.pm
 t/01_main.t
 t/pod.t
 t/pod-coverage.t
+t/selfcontained_output.t
 TODO
 examples/simple-xml.pl
 examples/double-escaping-example.pl
