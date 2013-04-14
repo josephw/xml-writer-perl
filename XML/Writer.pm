@@ -17,6 +17,7 @@ use Carp;
 use IO::Handle;
 $VERSION = "0.615";
 
+use overload '""' => \&_overload_string;
 
 
 ########################################################################
@@ -50,6 +51,8 @@ sub new {
   my $newlines = $params{NEWLINES};
   my $dataMode = $params{DATA_MODE};
   my $dataIndent;
+  my $selfcontained_output;
+  my $use_selfcontained_output = 0;
 
                                 # If the NEWLINES parameter is specified,
                                 # set the $nl variable appropriately
@@ -102,6 +105,9 @@ sub new {
                                 # and then call the regular ones.
   my $end = sub {
     $output->print("\n");
+
+    return $selfcontained_output 
+        if $use_selfcontained_output and defined wantarray;
   };
 
   my $SAFE_end = sub {
@@ -464,9 +470,15 @@ sub new {
   $self->{'SETOUTPUT'} = sub {
     my $newOutput = $_[0];
 
+     if ( $newOutput eq 'self' ) {
+        $newOutput = \$selfcontained_output;
+        $use_selfcontained_output = 1;
+     }
+
     if (ref($newOutput) eq 'SCALAR') {
       $output = XML::Writer::_String->new($newOutput);
     } else {
+
                                 # If there is no OUTPUT parameter,
                                 # use standard output
       $output = $newOutput || \*STDOUT;
@@ -480,6 +492,19 @@ sub new {
         }
       }
     }
+
+    $self->{OVERLOADSTRING} = sub {
+        # if we don't use the self-contained output, 
+        # simple passthrough
+        return $use_selfcontained_output ? $self->to_string : $self ;
+    };
+
+    $self->{TOSTRING} = sub {
+        die "'to_string' can only be used with self-contained output\n"
+            unless $use_selfcontained_output;
+
+        return $selfcontained_output;
+    };
 
     if ($params{CHECK_PRINT}) {
       $output = XML::Writer::_PrintChecker->new($output);
@@ -732,6 +757,12 @@ sub addPrefix {
 sub removePrefix {
 }
 
+sub to_string {
+    my $self = shift;
+
+    $self->{TOSTRING}->();
+}
+
 
 
 ########################################################################
@@ -791,6 +822,9 @@ sub _croakUnlessDefinedCharacters($) {
   }
 }
 
+sub _overload_string {
+    $_[0]->{OVERLOADSTRING}->();
+}   
 
 ########################################################################
 # XML::Writer::Namespaces - subclass for Namespace processing.
@@ -1255,6 +1289,17 @@ if this parameter is not present, the module will write to standard output. If
 a string reference is passed, it will capture the generated XML (as a string;
 to get bytes use the C<Encode> module).
 
+If the string I<self> is passed, the output will be captured internally by the
+object, and can be accessed via the C<to_string()> method, or by calling the 
+object in a string context.
+
+    my $writer = XML::Writer->new( OUTPUT => 'self' );
+
+    $writer->dataElement( hello => 'world' );
+
+    print $writer->to_string;  # outputs <hello>world</hello>
+    print "$writer";           # ditto
+
 =item NAMESPACES
 
 A true (1) or false (0, undef) value; if this parameter is present and
@@ -1353,6 +1398,9 @@ document has exactly one document element, and that all start tags are
 closed:
 
   $writer->end();
+
+If I<OUTPUT> as been set to I<self>, C<end()> will return the generated
+document as well.
 
 =item xmlDecl([$encoding, $standalone])
 
@@ -1658,6 +1706,19 @@ providing an UNSAFE parameter:
 
   my $writer = XML::Writer->new(OUTPUT => $output, UNSAFE => 1);
 
+=head2 PRINTING OUTPUT 
+
+If I<OUTPUT> has been set to I<self> and the object has been called in 
+a string context, it'll return the xml document.
+
+=over 4
+
+=item to_string
+
+If I<OUTPUT> has been set to I<self>, calls an implicit C<end()> on the 
+document and prints it. Dies if I<OUTPUT> has been set to anything else.
+
+=back
 
 =head1 AUTHOR
 
