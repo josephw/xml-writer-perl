@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 
 use XML::Writer;
 
@@ -31,6 +31,8 @@ like "$normal" => qr/^XML::Writer=HASH/,
     'auto-stringification on normal';
 
 
+$contained = XML::Writer->new( OUTPUT => 'self' );
+$contained->emptyTag('empty');
+$contained->end;
 
-
-
+is "$contained" => "<empty />\n", 'Calling end in a void context.';
