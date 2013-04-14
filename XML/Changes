@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::Writer.
 
+0.621 Sun Apr 14 22:42:38 2013 +1000    <joe@kafsemo.org>
+        - Include selfcontained_output.t in the distribution.
+
 0.620 Sun Apr 14 22:20:33 2013 +1000    <joe@kafsemo.org>
         - Allow OUTPUT => 'self' (#81327).
 
