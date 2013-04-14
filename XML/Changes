@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::Writer.
 
+0.620 Sun Apr 14 22:20:33 2013 +1000    <joe@kafsemo.org>
+        - Allow OUTPUT => 'self' (#81327).
+
 0.615 Tue Jan 17 01:32:07 2012 +1100    <joe@kafsemo.org>
         - Fix test skipping when Unicode is unsupported.
 
