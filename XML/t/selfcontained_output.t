@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+use Test::More tests => 9;
 
 use XML::Writer;
 
@@ -36,3 +36,22 @@ $contained->emptyTag('empty');
 $contained->end;
 
 is "$contained" => "<empty />\n", 'Calling end in a void context.';
+
+SKIP: {
+    eval { require IO::Scalar; };
+    skip "IO::Scalar is not installed", 2 if $@;
+
+    my $text = '';
+    my $writer_ioscalar = XML::Writer->new( OUTPUT => IO::Scalar->new(\$text) );
+
+    my $ioscalar_out = "<ioscalar>the IO::Scalar way</ioscalar>\n";
+    $writer_ioscalar->dataElement( ioscalar => 'the IO::Scalar way' );
+    $writer_ioscalar->end;
+
+    is $text => $ioscalar_out,
+        'IO::Scalar OUTPUT behaves the same way';
+
+    eval { $writer_ioscalar->to_string };
+    like $@ => qr/'to_string' can only be used with self-contained output/,
+        "to_string on IO::Scalar OUTPUT";
+}

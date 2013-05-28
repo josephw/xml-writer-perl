@@ -470,7 +470,7 @@ sub new {
   $self->{'SETOUTPUT'} = sub {
     my $newOutput = $_[0];
 
-     if ( $newOutput eq 'self' ) {
+     if ( !ref($newOutput) && 'self' eq $newOutput ) {
         $newOutput = \$selfcontained_output;
         $use_selfcontained_output = 1;
      }
