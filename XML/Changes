@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::Writer.
 
+0.622 Tue May 28 23:02:56 2013 +1000    <joe@kafsemo.org>
+        - Fix bug where output is an IO::Scalar.
+
 0.621 Sun Apr 14 22:42:38 2013 +1000    <joe@kafsemo.org>
         - Include selfcontained_output.t in the distribution.
 
