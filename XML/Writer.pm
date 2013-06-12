@@ -106,7 +106,7 @@ sub new {
   my $end = sub {
     $output->print("\n");
 
-    return $selfcontained_output 
+    return $selfcontained_output
         if $use_selfcontained_output and defined wantarray;
   };
 
@@ -478,7 +478,6 @@ sub new {
     if (ref($newOutput) eq 'SCALAR') {
       $output = XML::Writer::_String->new($newOutput);
     } else {
-
                                 # If there is no OUTPUT parameter,
                                 # use standard output
       $output = $newOutput || \*STDOUT;
@@ -494,7 +493,7 @@ sub new {
     }
 
     $self->{OVERLOADSTRING} = sub {
-        # if we don't use the self-contained output, 
+        # if we don't use the self-contained output,
         # simple passthrough
         return $use_selfcontained_output ? $self->to_string : $self ;
     };
@@ -824,7 +823,7 @@ sub _croakUnlessDefinedCharacters($) {
 
 sub _overload_string {
     $_[0]->{OVERLOADSTRING}->();
-}   
+}
 
 ########################################################################
 # XML::Writer::Namespaces - subclass for Namespace processing.
@@ -1290,7 +1289,7 @@ a string reference is passed, it will capture the generated XML (as a string;
 to get bytes use the C<Encode> module).
 
 If the string I<self> is passed, the output will be captured internally by the
-object, and can be accessed via the C<to_string()> method, or by calling the 
+object, and can be accessed via the C<to_string()> method, or by calling the
 object in a string context.
 
     my $writer = XML::Writer->new( OUTPUT => 'self' );
@@ -1706,16 +1705,16 @@ providing an UNSAFE parameter:
 
   my $writer = XML::Writer->new(OUTPUT => $output, UNSAFE => 1);
 
-=head2 PRINTING OUTPUT 
+=head2 PRINTING OUTPUT
 
-If I<OUTPUT> has been set to I<self> and the object has been called in 
+If I<OUTPUT> has been set to I<self> and the object has been called in
 a string context, it'll return the xml document.
 
 =over 4
 
 =item to_string
 
-If I<OUTPUT> has been set to I<self>, calls an implicit C<end()> on the 
+If I<OUTPUT> has been set to I<self>, calls an implicit C<end()> on the
 document and prints it. Dies if I<OUTPUT> has been set to anything else.
 
 =back
