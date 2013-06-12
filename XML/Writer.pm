@@ -492,22 +492,22 @@ sub new {
       }
     }
 
-    $self->{OVERLOADSTRING} = sub {
-        # if we don't use the self-contained output,
-        # simple passthrough
-        return $use_selfcontained_output ? $self->to_string : $self ;
-    };
-
-    $self->{TOSTRING} = sub {
-        die "'to_string' can only be used with self-contained output\n"
-            unless $use_selfcontained_output;
-
-        return $selfcontained_output;
-    };
-
     if ($params{CHECK_PRINT}) {
       $output = XML::Writer::_PrintChecker->new($output);
     }
+  };
+
+  $self->{OVERLOADSTRING} = sub {
+      # if we don't use the self-contained output,
+      # simple passthrough
+      return $use_selfcontained_output ? $selfcontained_output : undef;
+  };
+
+  $self->{TOSTRING} = sub {
+      die "'to_string' can only be used with self-contained output\n"
+          unless $use_selfcontained_output;
+
+      return $selfcontained_output;
   };
 
   $self->{'SETDATAMODE'} = sub {
@@ -822,7 +822,7 @@ sub _croakUnlessDefinedCharacters($) {
 }
 
 sub _overload_string {
-    $_[0]->{OVERLOADSTRING}->();
+    $_[0]->{OVERLOADSTRING}->() || $_[0];
 }
 
 ########################################################################
