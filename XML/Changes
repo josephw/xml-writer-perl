@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Writer.
 
+0.623 Thu Jun 13 23:29:52 2013 +1000    <joe@kafsemo.org>
+        - Fix a memory leak introduced in 0.620.
+        - Avoid issue with implicit stringification.
+
 0.622 Tue May 28 23:02:56 2013 +1000    <joe@kafsemo.org>
         - Fix bug where output is an IO::Scalar.
 

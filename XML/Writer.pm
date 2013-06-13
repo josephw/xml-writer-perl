@@ -15,7 +15,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 use IO::Handle;
-$VERSION = "0.622";
+$VERSION = "0.623";
 
 use overload '""' => \&_overload_string;
 
