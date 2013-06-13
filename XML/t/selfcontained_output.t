@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More tests => 10;
 
 use XML::Writer;
 
@@ -30,6 +30,8 @@ is "$contained" => $contained_result,
 like "$normal" => qr/^XML::Writer=HASH/,
     'auto-stringification on normal';
 
+is ref($normal->_overload_string) => '',
+    'auto-stringification returns a string directly';
 
 $contained = XML::Writer->new( OUTPUT => 'self' );
 $contained->emptyTag('empty');

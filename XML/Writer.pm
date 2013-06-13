@@ -822,7 +822,8 @@ sub _croakUnlessDefinedCharacters($) {
 }
 
 sub _overload_string {
-    $_[0]->{OVERLOADSTRING}->() || $_[0];
+    my $self = shift;
+    $self->{OVERLOADSTRING}->() || overload::StrVal($self);
 }
 
 ########################################################################
