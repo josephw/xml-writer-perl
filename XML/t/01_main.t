@@ -84,7 +84,7 @@ sub initEnv(@)
 	$args{'NAMESPACES'} = 1 unless(defined($args{'NAMESPACES'}));
 
 	undef($warning);
-	$w = XML::Writer->new(%args) || die "Cannot create XML writer";
+	defined($w = XML::Writer->new(%args)) || die "Cannot create XML writer";
 }
 
 #
