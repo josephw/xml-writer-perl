@@ -9,8 +9,8 @@ libdevel-cover-perl libtemplate-perl libtest-pod-coverage-perl libppi-html-perl
 Commit all changes.
 
 Run tests:
-for t in XML/t/*.t; do
-  PERL5LIB=. perl "$t"
+for t in t/*.t; do
+  PERL5LIB=.. perl "$t"
 done
 
 Bump version in:
