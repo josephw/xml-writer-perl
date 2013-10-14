@@ -15,7 +15,7 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 239);
+use Test::More(tests => 242);
 
 
 # Catch warnings
@@ -199,6 +199,27 @@ TEST: {
 	expectError("A DOCTYPE declaration with a public ID must also have a system ID", eval {
 		$w->doctype('html', "-//W3C//DTD XHTML 1.1//EN");
 	});
+};
+
+# A document with a public identifier and an undefined system identifier
+TEST: {
+	initEnv();
+	expectError("A DOCTYPE declaration with a public ID must also have a system ID", eval {
+		$w->doctype('html', "-//W3C//DTD XHTML 1.1//EN", undef);
+	});
+};
+
+# A document with a public identifier and an empty system identifier
+TEST: {
+	initEnv();
+	$w->doctype('html', "-//W3C//DTD XHTML 1.1//EN",
+						"");
+	$w->emptyTag('html');
+	$w->end();
+	checkResult(<<"EOS", 'A document with a public and an empty system identifier');
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "">
+<html />
+EOS
 };
 
 # A document with only a system identifier set
