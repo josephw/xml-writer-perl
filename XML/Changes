@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::Writer.
 
+0.624 Wed Feb 12 23:28:39 2014 +1100    <joe@kafsemo.org>
+        - Allow an empty system ID in a doctype declaration.
+
 0.623 Thu Jun 13 23:29:52 2013 +1000    <joe@kafsemo.org>
         - Fix a memory leak introduced in 0.620.
         - Avoid issue with implicit stringification.
