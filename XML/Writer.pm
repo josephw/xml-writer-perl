@@ -172,7 +172,7 @@ sub new {
   my $SAFE_pi = sub {
     my ($name, $data) = (@_);
     $seen{ANYTHING} = 1;
-    if (($name =~ /^xml/i) && ($name !~ /^xml-stylesheet$/i)) {
+    if (($name =~ /^xml/i) && ($name !~ /^xml-(stylesheet|model)$/i)) {
       carp("Processing instruction target begins with 'xml'");
     }
 

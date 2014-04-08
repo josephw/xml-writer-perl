@@ -15,7 +15,7 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 243);
+use Test::More(tests => 246);
 
 
 # Catch warnings
@@ -798,6 +798,22 @@ TEST: {
 	$w->end();
 
 	wasNoWarning('The test processing instructions should not cause warnings');
+};
+
+# Additionally, confirm that 'xml-model' is also permitted
+TEST: {
+	initEnv();
+	$w->pi('xml-model', 'href="http://example.org/example.rng"');
+
+	$w->emptyTag('x');
+
+	$w->end();
+
+	wasNoWarning('An xml-model processing instruction should not cause warnings');
+	checkResult(<<"EOS", "A document with an xsl-model pi");
+<?xml-model href="http://example.org/example.rng"?>
+<x />
+EOS
 };
 
 # Verify that a still-reserved processing instruction generates
