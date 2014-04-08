@@ -470,10 +470,10 @@ sub new {
   $self->{'SETOUTPUT'} = sub {
     my $newOutput = $_[0];
 
-     if ( !ref($newOutput) && 'self' eq $newOutput ) {
-        $newOutput = \$selfcontained_output;
-        $use_selfcontained_output = 1;
-     }
+    if ( !ref($newOutput) && 'self' eq $newOutput ) {
+      $newOutput = \$selfcontained_output;
+      $use_selfcontained_output = 1;
+    }
 
     if (ref($newOutput) eq 'SCALAR') {
       $output = XML::Writer::_String->new($newOutput);
