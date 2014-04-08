@@ -15,7 +15,7 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 242);
+use Test::More(tests => 243);
 
 
 # Catch warnings
@@ -1350,6 +1350,8 @@ TEST: {
 	initEnv();
 
 	$w->setOutput();
+
+	wasNoWarning('setOutput without a defined argument should not cause warnings');
 
 	is($w->getOutput(), \*STDOUT, 'If no output is given, STDOUT should be used');
 };
