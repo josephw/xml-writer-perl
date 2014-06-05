@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Writer.
 
+0.625 Thu 05 Jun 2014 23:55:42 +1000    <joe@kafsemo.org>
+        - Allow xml-model processing instructions (#94078).
+        - Don't warn when undef is passed to setOutput (#94369).
+
 0.624 Wed Feb 12 23:28:39 2014 +1100    <joe@kafsemo.org>
         - Allow an empty system ID in a doctype declaration.
 
