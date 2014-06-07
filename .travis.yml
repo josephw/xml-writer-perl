@@ -1,0 +1,6 @@
+language: perl
+perl:
+ - "5.8"
+ - "5.18"
+before_install:
+ - cd XML

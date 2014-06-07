@@ -4,11 +4,17 @@
 #   ulimit -v 102400
 # to speed up resource exhaustion.
 
+# Skipped by default; un-skip and run with ulimit during
+#  memory investigations.
+
 use strict;
 
 use Test::More tests => 1;
 
 use XML::Writer;
+
+SKIP: {
+skip "This test is skipped in automated builds", 1;
 
 foreach my $step (1..1000)
 {
@@ -31,3 +37,4 @@ foreach my $step (1..1000)
 }
 
 ok(1, 'Complete without exhausting memory');
+}
