@@ -918,9 +918,11 @@ sub new {
       $clashMap{$p} = $u;
     }
 
-    while (!defined($prefix) || ($clashMap{$prefix} && $clashMap{$prefix} ne $uri)) {
-      $prefix = "__NS$prefixCounter";
-      $prefixCounter++;
+    if (!defined($prefix)) {
+      do {
+        $prefix = "__NS$prefixCounter";
+        $prefixCounter++;
+      } while ($clashMap{$prefix});
     }
 
     return $prefix;
