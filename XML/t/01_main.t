@@ -15,7 +15,7 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 246);
+use Test::More(tests => 247);
 
 
 # Catch warnings
@@ -2036,6 +2036,13 @@ SKIP: {
 			ENCODING => 'x-unsupported-encoding');
 	});
 };
+
+# Confirm that a scalar other than 'self' is also treated as STDOUT
+TEST: {
+	expectError('Output must be a handle', eval {
+		initEnv(OUTPUT => 'not-self');
+	});
+}
 
 # Free test resources
 $outputFile->close() or die "Unable to close temporary file: $!";

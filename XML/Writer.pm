@@ -470,9 +470,13 @@ sub new {
   $self->{'SETOUTPUT'} = sub {
     my $newOutput = $_[0];
 
-    if (defined($newOutput) && !ref($newOutput) && 'self' eq $newOutput ) {
-      $newOutput = \$selfcontained_output;
-      $use_selfcontained_output = 1;
+    if (defined($newOutput) && !ref($newOutput)) {
+      if ('self' eq $newOutput ) {
+        $newOutput = \$selfcontained_output;
+        $use_selfcontained_output = 1;
+      } else {
+        die "Output must be a handle, a reference or 'self'";
+      }
     }
 
     if (ref($newOutput) eq 'SCALAR') {
