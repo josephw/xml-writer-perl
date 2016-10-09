@@ -15,7 +15,7 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 259);
+use Test::More(tests => 261);
 
 
 # Catch warnings
@@ -2098,6 +2098,20 @@ TEST: {
 	expectError('Output must be a handle', eval {
 		initEnv(OUTPUT => 'not-self');
 	});
+}
+
+# Unsafe mode should not enforce element name checks
+TEST: {
+	initEnv(UNSAFE => 1);
+
+	$w->startTag('te<xt');
+	$w->emptyTag('te<xt');
+	$w->endTag('te<xt');
+	$w->end();
+
+	checkResult(<<"EOR", 'Unsafe mode should not enforce element name checks');
+<te<xt><te<xt /></te<xt>
+EOR
 }
 
 # Free test resources
