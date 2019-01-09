@@ -62,13 +62,15 @@ sub new {
   }
 
   my $outputEncoding = $params{ENCODING} || "";
-  my ($checkUnencodedRepertoire, $escapeEncoding);
+  my ($checkUnencodedRepertoire, $escapeEncoding, $checkIdentifier);
   if (lc($outputEncoding) eq 'us-ascii') {
     $checkUnencodedRepertoire = \&_croakUnlessASCII;
+    $checkIdentifier = \&_croakUnlessNonEmptyASCII;
     $escapeEncoding = \&_escapeASCII;
   } else {
     my $doNothing = sub {};
     $checkUnencodedRepertoire = $doNothing;
+    $checkIdentifier = \&_croakUnlessNonEmptyUnicode;
     $escapeEncoding = $doNothing;
   }
 
@@ -266,8 +268,8 @@ sub new {
   my $SAFE_startTag = sub {
     my $name = $_[0];
 
-    &{$checkUnencodedRepertoire}($name);
-    _checkAttributes(\@_);
+    &{$checkIdentifier}($name);
+    _checkAttributes(\@_, $checkIdentifier);
 
     if ($seen{ELEMENT} && $elementLevel == 0) {
       croak("Attempt to insert start tag after close of document element");
@@ -301,8 +303,8 @@ sub new {
   my $SAFE_emptyTag = sub {
     my $name = $_[0];
 
-    &{$checkUnencodedRepertoire}($name);
-    _checkAttributes(\@_);
+    &{$checkIdentifier}($name);
+    _checkAttributes(\@_, $checkIdentifier);
 
     if ($seen{ELEMENT} && $elementLevel == 0) {
       croak("Attempt to insert empty tag after close of document element");
@@ -780,6 +782,8 @@ sub to_string {
 sub _checkAttributes {
   my %anames;
   my $i = 1;
+  my $checkIdentifier = $_[1];
+
   while ($_[0]->[$i]) {
     my $name = $_[0]->[$i];
     $i += 1;
@@ -788,6 +792,7 @@ sub _checkAttributes {
     } else {
       $anames{$name} = 1;
     }
+    &{$checkIdentifier}($name);
     _croakUnlessDefinedCharacters($_[0]->[$i]);
     $i += 1;
   }
@@ -822,6 +827,24 @@ sub _croakUnlessASCII($) {
 sub _croakUnlessDefinedCharacters($) {
   if ($_[0] =~ /([\x00-\x08\x0B-\x0C\x0E-\x1F])/) {
     croak(sprintf('Code point \u%04X is not a valid character in XML', ord($1)));
+  }
+}
+
+sub _croakUnlessNonEmptyASCII($) {
+  if ($_[0] eq '') {
+    croak('Empty identifiers are not permitted in this part of a US-ASCII document');
+  }
+  if ($_[0] =~ /[^\x21-\x7F]/) {
+    croak('Non-ASCII characters are not permitted in this part of a US-ASCII document');
+  }
+}
+
+sub _croakUnlessNonEmptyUnicode($) {
+  if ($_[0] eq '') {
+    croak('Empty identifiers are not permitted in this part of a Unicode document');
+  }
+  if ($_[0] =~ /\s/) {
+    croak('Space characters are not permitted in this part of a Unicode document');
   }
 }
 

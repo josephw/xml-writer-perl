@@ -15,7 +15,7 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 247);
+use Test::More(tests => 253);
 
 
 # Catch warnings
@@ -286,6 +286,49 @@ TEST: {
 	$w->end();
 	checkResult("<foo x=\"1&gt;2\" />\n", 'Simple attributes');
 };
+
+
+TEST: {
+	initEnv();
+	expectError("Empty identifiers are not permitted in this part of ", eval {
+		$w->emptyTag("");
+	});
+}
+
+TEST: {
+	initEnv();
+	expectError("Space characters are not permitted in this part of ", eval {
+		$w->emptyTag("\t");
+	});
+}
+
+TEST: {
+	initEnv();
+	expectError("Space characters are not permitted in this part of ", eval {
+		$w->emptyTag("foo", " " => "2>1");
+	});
+}
+
+TEST: {
+	initEnv(ENCODING => 'us-ascii');
+	expectError("Empty identifiers are not permitted in this part of ", eval {
+		$w->emptyTag("");
+	});
+}
+
+TEST: {
+	initEnv(ENCODING => 'us-ascii');
+	expectError("Non-ASCII characters are not permitted in this part of ", eval {
+		$w->emptyTag("\t");
+	});
+}
+
+TEST: {
+	initEnv(ENCODING => 'us-ascii');
+	expectError("Non-ASCII characters are not permitted in this part of ", eval {
+		$w->emptyTag("foo", " " => "2>1");
+	});
+}
 
 # Character data
 TEST: {
