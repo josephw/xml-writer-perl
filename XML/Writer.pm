@@ -62,15 +62,13 @@ sub new {
   }
 
   my $outputEncoding = $params{ENCODING} || "";
-  my ($checkUnencodedRepertoire, $escapeEncoding, $checkIdentifier);
+  my ($checkUnencodedRepertoire, $escapeEncoding);
   if (lc($outputEncoding) eq 'us-ascii') {
     $checkUnencodedRepertoire = \&_croakUnlessASCII;
-    $checkIdentifier = \&_croakUnlessNonEmptyASCII;
     $escapeEncoding = \&_escapeASCII;
   } else {
     my $doNothing = sub {};
     $checkUnencodedRepertoire = $doNothing;
-    $checkIdentifier = \&_croakUnlessNonEmptyUnicode;
     $escapeEncoding = $doNothing;
   }
 
@@ -268,8 +266,9 @@ sub new {
   my $SAFE_startTag = sub {
     my $name = $_[0];
 
-    &{$checkIdentifier}($name);
-    _checkAttributes(\@_, $checkIdentifier);
+    _croakUnlessNonEmptyIdentifier($name);
+    &{$checkUnencodedRepertoire}($name);
+    _checkAttributes(\@_, $checkUnencodedRepertoire);
 
     if ($seen{ELEMENT} && $elementLevel == 0) {
       croak("Attempt to insert start tag after close of document element");
@@ -303,8 +302,9 @@ sub new {
   my $SAFE_emptyTag = sub {
     my $name = $_[0];
 
-    &{$checkIdentifier}($name);
-    _checkAttributes(\@_, $checkIdentifier);
+    _croakUnlessNonEmptyIdentifier($name);
+    &{$checkUnencodedRepertoire}($name);
+    _checkAttributes(\@_, $checkUnencodedRepertoire);
 
     if ($seen{ELEMENT} && $elementLevel == 0) {
       croak("Attempt to insert empty tag after close of document element");
@@ -782,7 +782,7 @@ sub to_string {
 sub _checkAttributes {
   my %anames;
   my $i = 1;
-  my $checkIdentifier = $_[1];
+  my $checkUnencodedRepertoire = $_[1];
 
   while ($_[0]->[$i]) {
     my $name = $_[0]->[$i];
@@ -792,7 +792,8 @@ sub _checkAttributes {
     } else {
       $anames{$name} = 1;
     }
-    &{$checkIdentifier}($name);
+    _croakUnlessNonEmptyIdentifier($name);
+    &{$checkUnencodedRepertoire}($name);
     _croakUnlessDefinedCharacters($_[0]->[$i]);
     $i += 1;
   }
@@ -830,21 +831,13 @@ sub _croakUnlessDefinedCharacters($) {
   }
 }
 
-sub _croakUnlessNonEmptyASCII($) {
+# Ensure element and attribute names are non-empty, and contain no whitespace.
+sub _croakUnlessNonEmptyIdentifier($) {
   if ($_[0] eq '') {
-    croak('Empty identifiers are not permitted in this part of a US-ASCII document');
-  }
-  if ($_[0] =~ /[^\x21-\x7F]/) {
-    croak('Non-ASCII characters are not permitted in this part of a US-ASCII document');
-  }
-}
-
-sub _croakUnlessNonEmptyUnicode($) {
-  if ($_[0] eq '') {
-    croak('Empty identifiers are not permitted in this part of a Unicode document');
+    croak('Empty identifiers are not permitted in this part of an XML document');
   }
   if ($_[0] =~ /\s/) {
-    croak('Space characters are not permitted in this part of a Unicode document');
+    croak('Space characters are not permitted in this part of an XML identifier');
   }
 }
 
