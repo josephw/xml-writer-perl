@@ -2,5 +2,6 @@ language: perl
 perl:
  - "5.8"
  - "5.18"
+ - "cperl-5.28"
 before_install:
  - cd XML
