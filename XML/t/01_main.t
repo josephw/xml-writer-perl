@@ -34,20 +34,9 @@ sub wasNoWarning($)
 	}
 }
 
-# Constants for Unicode support
-my $unicodeSkipMessage = 'Unicode only supported with Perl >= 5.8.1';
-
-sub isUnicodeSupported()
-{
-	return $] >= 5.008001;
-}
-
 require XML::Writer;
 
-SKIP: {
-	skip "Perls before 5.6 always warn when loading XML::Writer", 1 if $] <=
-	5.006;
-
+TEST: {
 	wasNoWarning('Loading XML::Writer should not result in warnings');
 }
 
@@ -62,7 +51,7 @@ my $outputFile = IO::File->new_tmpfile or die "Unable to create temporary file: 
 sub getBufStr()
 {
 	local($/);
-	binmode($outputFile, ':bytes') if isUnicodeSupported();
+	binmode($outputFile, ':bytes');
 	$outputFile->seek(0, 0);
 	return <$outputFile>;
 }
@@ -1448,9 +1437,7 @@ TEST: {
 };
 
 # Make sure UTF-8 is written properly
-SKIP: {
-	skip $unicodeSkipMessage, 2 unless isUnicodeSupported();
-
+TEST: {
 	initEnv(ENCODING => 'utf-8', DATA_MODE => 1);
 
 	$w->xmlDecl();
@@ -1485,9 +1472,7 @@ EOR
 };
 
 # Test UTF-8 element name
-SKIP: {
-	skip $unicodeSkipMessage, 2 unless isUnicodeSupported();
-
+TEST: {
 	# I need U+00E9 as an is_utf8 string; I want to keep the source ASCII.
 	# There must be a better way to do this.
 	require Encode;
@@ -1499,9 +1484,7 @@ SKIP: {
 };
 
 # Test UTF-8 attribute name
-SKIP: {
-	skip $unicodeSkipMessage, 2 unless isUnicodeSupported();
-
+TEST: {
 	# I need U+00E9 as an is_utf8 string; I want to keep the source ASCII.
 	# There must be a better way to do this.
 	require Encode;
@@ -1560,9 +1543,7 @@ TEST: {
 }
 
 # Make sure scalars are built up as UTF-8 (if UTF-8 is passed in)
-SKIP: {
-	skip $unicodeSkipMessage, 2 unless isUnicodeSupported();
-
+TEST: {
 	initEnv();
 	my $s;
 
@@ -1591,9 +1572,7 @@ SKIP: {
 }
 
 # Test US-ASCII encoding
-SKIP: {
-	skip $unicodeSkipMessage, 9 unless isUnicodeSupported();
-
+TEST: {
 	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
 
 	$w->xmlDecl();
@@ -1719,9 +1698,7 @@ EOR
 }
 
 # Test characters outside the BMP
-SKIP: {
-	skip $unicodeSkipMessage, 4 unless isUnicodeSupported();
-
+TEST: {
 	my $s = "\x{10480}"; # U+10480 OSMANYA LETTER ALEF
 
 	initEnv(ENCODING => 'utf-8');
@@ -1842,9 +1819,7 @@ EOR
 }
 
 # Cover XML declaration encoding cases
-SKIP: {
-	skip $unicodeSkipMessage, 8 unless isUnicodeSupported();
-
+TEST: {
 	# No declaration unless specified
 	initEnv();
 	$w->xmlDecl();
@@ -2111,9 +2086,7 @@ TEST: {
 };
 
 # We should try to set the encoding on GLOBs as well as IO::Handles
-SKIP: {
-	skip $unicodeSkipMessage, 1 unless isUnicodeSupported();
-
+TEST: {
 	expectError('encoding', eval {
 		initEnv(OUTPUT => \*STDOUT,
 			ENCODING => 'x-unsupported-encoding');
