@@ -15,7 +15,7 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 247);
+use Test::More(tests => 259);
 
 
 # Catch warnings
@@ -279,6 +279,35 @@ TEST: {
 	checkResult("<foo></foo>\n", 'A separate start and end tag');
 };
 
+# Empty element names and names with spaces
+TEST: {
+	initEnv();
+	expectError("Empty identifiers are not permitted in this part of ", eval {
+		$w->emptyTag("");
+	});
+}
+
+TEST: {
+	initEnv();
+	expectError("Space characters are not permitted in this part of ", eval {
+		$w->emptyTag("a\tb");
+	});
+}
+
+TEST: {
+	initEnv(ENCODING => 'us-ascii');
+	expectError("Empty identifiers are not permitted in this part of ", eval {
+		$w->emptyTag("");
+	});
+}
+
+TEST: {
+	initEnv(ENCODING => 'us-ascii');
+	expectError("Space characters are not permitted in this part of ", eval {
+		$w->emptyTag("a\tb");
+	});
+}
+
 # Attributes
 TEST: {
 	initEnv();
@@ -286,6 +315,20 @@ TEST: {
 	$w->end();
 	checkResult("<foo x=\"1&gt;2\" />\n", 'Simple attributes');
 };
+
+TEST: {
+	initEnv();
+	expectError("Space characters are not permitted in this part of ", eval {
+		$w->emptyTag("foo", "a b" => "2>1");
+	});
+}
+
+TEST: {
+	initEnv(ENCODING => 'us-ascii');
+	expectError("Space characters are not permitted in this part of ", eval {
+		$w->emptyTag("foo", "a b" => "2>1");
+	});
+}
 
 # Character data
 TEST: {
@@ -1441,6 +1484,34 @@ SKIP: {
 EOR
 };
 
+# Test UTF-8 element name
+SKIP: {
+	skip $unicodeSkipMessage, 2 unless isUnicodeSupported();
+
+	# I need U+00E9 as an is_utf8 string; I want to keep the source ASCII.
+	# There must be a better way to do this.
+	require Encode;
+	my $text = Encode::decode('iso-8859-1', "\x{E9}");
+
+	initEnv(ENCODING => 'utf-8');
+	$w->emptyTag("r${text}sum${text}");
+	checkResult("<r\x{C3}\x{A9}sum\x{C3}\x{A9} />", 'E-acute element name permitted');
+};
+
+# Test UTF-8 attribute name
+SKIP: {
+	skip $unicodeSkipMessage, 2 unless isUnicodeSupported();
+
+	# I need U+00E9 as an is_utf8 string; I want to keep the source ASCII.
+	# There must be a better way to do this.
+	require Encode;
+	my $text = Encode::decode('iso-8859-1', "\x{E9}");
+
+	initEnv(ENCODING => 'utf-8');
+	$w->emptyTag("foo", "fianc${text}" => 'true');
+	checkResult("<foo fianc\x{C3}\x{A9}=\"true\" />", 'E-acute attribute name permitted');
+};
+
 # Capture generated XML in a scalar
 TEST: {
 	initEnv();
@@ -1521,7 +1592,7 @@ SKIP: {
 
 # Test US-ASCII encoding
 SKIP: {
-	skip $unicodeSkipMessage, 7 unless isUnicodeSupported();
+	skip $unicodeSkipMessage, 9 unless isUnicodeSupported();
 
 	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
 
@@ -1571,6 +1642,18 @@ EOR
 	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
 	expectError('ASCII', eval {
 		$w->emptyTag("\x{DC}berpr\x{FC}fung");
+	});
+
+
+	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
+	expectError("Non-ASCII characters are not permitted in this part of ", eval {
+		$w->emptyTag("r\x{E9}sum\x{E9}");
+	});
+
+
+	initEnv(ENCODING => 'us-ascii', DATA_MODE => 1);
+	expectError("Non-ASCII characters are not permitted in this part of ", eval {
+		$w->emptyTag("foo", "fianc\x{E9}" => 'true');
 	});
 
 

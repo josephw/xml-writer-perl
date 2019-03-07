@@ -266,8 +266,9 @@ sub new {
   my $SAFE_startTag = sub {
     my $name = $_[0];
 
+    _croakUnlessNonEmptyIdentifier($name);
     &{$checkUnencodedRepertoire}($name);
-    _checkAttributes(\@_);
+    _checkAttributes(\@_, $checkUnencodedRepertoire);
 
     if ($seen{ELEMENT} && $elementLevel == 0) {
       croak("Attempt to insert start tag after close of document element");
@@ -301,8 +302,9 @@ sub new {
   my $SAFE_emptyTag = sub {
     my $name = $_[0];
 
+    _croakUnlessNonEmptyIdentifier($name);
     &{$checkUnencodedRepertoire}($name);
-    _checkAttributes(\@_);
+    _checkAttributes(\@_, $checkUnencodedRepertoire);
 
     if ($seen{ELEMENT} && $elementLevel == 0) {
       croak("Attempt to insert empty tag after close of document element");
@@ -780,6 +782,8 @@ sub to_string {
 sub _checkAttributes {
   my %anames;
   my $i = 1;
+  my $checkUnencodedRepertoire = $_[1];
+
   while ($_[0]->[$i]) {
     my $name = $_[0]->[$i];
     $i += 1;
@@ -788,6 +792,8 @@ sub _checkAttributes {
     } else {
       $anames{$name} = 1;
     }
+    _croakUnlessNonEmptyIdentifier($name);
+    &{$checkUnencodedRepertoire}($name);
     _croakUnlessDefinedCharacters($_[0]->[$i]);
     $i += 1;
   }
@@ -822,6 +828,16 @@ sub _croakUnlessASCII($) {
 sub _croakUnlessDefinedCharacters($) {
   if ($_[0] =~ /([\x00-\x08\x0B-\x0C\x0E-\x1F])/) {
     croak(sprintf('Code point \u%04X is not a valid character in XML', ord($1)));
+  }
+}
+
+# Ensure element and attribute names are non-empty, and contain no whitespace.
+sub _croakUnlessNonEmptyIdentifier($) {
+  if ($_[0] eq '') {
+    croak('Empty identifiers are not permitted in this part of an XML document');
+  }
+  if ($_[0] =~ /\s/) {
+    croak('Space characters are not permitted in this part of an XML identifier');
   }
 }
 
