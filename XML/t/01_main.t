@@ -15,7 +15,7 @@ use strict;
 
 use Errno;
 
-use Test::More(tests => 261);
+use Test::More(tests => 262);
 
 
 # Catch warnings
@@ -2112,6 +2112,15 @@ TEST: {
 	checkResult(<<"EOR", 'Unsafe mode should not enforce element name checks');
 <te<xt><te<xt /></te<xt>
 EOR
+}
+
+# Safe mode should enforce element name checks
+TEST: {
+	initEnv();
+
+	expectError("Character not permitted in identifiers", eval {
+		$w->emptyTag("te<xt");
+        });
 }
 
 # Free test resources
