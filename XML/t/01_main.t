@@ -2118,7 +2118,7 @@ EOR
 TEST: {
 	initEnv();
 
-	expectError("Character not permitted in identifiers", eval {
+	expectError("Not a valid XML name: te<xt", eval {
 		$w->emptyTag("te<xt");
         });
 }
