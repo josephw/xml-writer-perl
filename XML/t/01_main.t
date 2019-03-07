@@ -2037,7 +2037,7 @@ SKIP: {
 	});
 };
 
-# Confirm that a scalar other than 'self' is also treated as STDOUT
+# Confirm that a scalar other than 'self' is treated as an error
 TEST: {
 	expectError('Output must be a handle', eval {
 		initEnv(OUTPUT => 'not-self');
