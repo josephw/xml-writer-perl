@@ -32,7 +32,7 @@ Locally,
 # Create a distribution from the tag
 mkdir /tmp/xml-writer-release
 git archive xml-writer-$xwver | tar -x -C /tmp/xml-writer-release
-cd /tmp/xml-writer-release
+cd /tmp/xml-writer-release/XML
 
 perl Makefile.PL
 make dist
