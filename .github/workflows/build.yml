@@ -23,6 +23,8 @@ jobs:
       uses: shogo82148/actions-setup-perl@v1
       with:
         perl-version: ${{ matrix.perl }}
+        install-modules-with: cpanm
+        install-modules: "Devel::Cover Test::Pod Test::Pod::Coverage"
     - run: perl Makefile.PL
     - run: make test
     - run: make dist
