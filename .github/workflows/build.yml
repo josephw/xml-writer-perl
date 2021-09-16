@@ -1,0 +1,54 @@
+name: CI builds
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        perl: ["5.8", "5.28", "latest"]
+
+    defaults:
+      run:
+        working-directory: "XML/"
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up perl
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: ${{ matrix.perl }}
+        install-modules-with: cpanm
+        install-modules: "Test::Pod Test::Pod::Coverage"
+    - run: perl Makefile.PL
+    - run: make test
+    - run: make dist
+
+  coverage:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: "XML/"
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up perl
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: "latest"
+        install-modules-with: cpanm
+        install-modules: "Devel::Cover Template Test::Pod Test::Pod::Coverage"
+    - run: perl Makefile.PL
+    - run: cover -test -report Html_basic -outputdir coverage
+
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v2
+      with:
+        name: code-coverage-report
+        path: XML/coverage/
